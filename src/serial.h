@@ -29,4 +29,4 @@ int serial_sync(int fd);
 int serial_flush(int fd);
 int serial_close(int fd);
 
-#endif	// SERIAL_H__
+#endif  // SERIAL_H__

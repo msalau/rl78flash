@@ -30,7 +30,7 @@ int serial_open(const char *port)
     int fd;
     if (4 <= verbose_level)
     {
-	printf("\t\tOpen port: %s\n", port);
+        printf("\t\tOpen port: %s\n", port);
     }
     fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
     if (-1 == fd)
@@ -52,8 +52,8 @@ int serial_open(const char *port)
         options.c_cc[VMIN] = 0;
         options.c_cc[VTIME] = 1;
         tcsetattr(fd, TCSANOW, &options);
-	usleep(1000);
-	ioctl(fd, TCFLSH, TCIOFLUSH);
+        usleep(1000);
+        ioctl(fd, TCFLSH, TCIOFLUSH);
     }
     return fd;
 }
@@ -109,28 +109,28 @@ int serial_write(int fd, const void *buf, int len)
 {
     if (4 <= verbose_level)
     {
-	unsigned char *p = (unsigned char*)buf;
-	unsigned int i;
-	printf("\t\tsend(%u): ", len);
-	for (i = len; 0 < i; --i)
-	{
-	    printf("%02X ", *p++);
-	}
-	printf("\n");
+        unsigned char *p = (unsigned char*)buf;
+        unsigned int i;
+        printf("\t\tsend(%u): ", len);
+        for (i = len; 0 < i; --i)
+        {
+            printf("%02X ", *p++);
+        }
+        printf("\n");
     }
     int bytes_left = len;
     int rc = 0;
     unsigned char *pbuf = (unsigned char*)buf;
     do
     {
-	rc = write(fd, pbuf, bytes_left);
-	if (0 > rc)
-	{
-	    fprintf(stderr, "Failed to write to port.\n");
-	    return rc;
-	}
-	pbuf += rc;
-	bytes_left -= rc;
+        rc = write(fd, pbuf, bytes_left);
+        if (0 > rc)
+        {
+            fprintf(stderr, "Failed to write to port.\n");
+            return rc;
+        }
+        pbuf += rc;
+        bytes_left -= rc;
     }
     while (0 < bytes_left);
     return len - bytes_left;
@@ -143,31 +143,31 @@ int serial_read(int fd, void *buf, int len)
     unsigned char *pbuf = (unsigned char*)buf;
     do
     {
-	rc = read(fd, pbuf, bytes_left);
-	if (0 > rc)
-	{
-	    fprintf(stderr, "Failed to read from port.\n");
-	    return rc;
-	}
-	if (0 == rc)
-	{
-	    break;
-	}
-	pbuf += rc;
-	bytes_left -= rc;
+        rc = read(fd, pbuf, bytes_left);
+        if (0 > rc)
+        {
+            fprintf(stderr, "Failed to read from port.\n");
+            return rc;
+        }
+        if (0 == rc)
+        {
+            break;
+        }
+        pbuf += rc;
+        bytes_left -= rc;
     }
     while (0 < bytes_left);
     const int nbytes = len - bytes_left;
     if (4 <= verbose_level)
     {
-	pbuf = buf;
-	unsigned int i;
-	printf("\t\trecv(%u): ", nbytes);
-	for (i = nbytes; 0 < i; --i)
-	{
-	    printf("%02X ", *pbuf++);
-	}
-	printf("\n");
+        pbuf = buf;
+        unsigned int i;
+        printf("\t\trecv(%u): ", nbytes);
+        for (i = nbytes; 0 < i; --i)
+        {
+            printf("%02X ", *pbuf++);
+        }
+        printf("\n");
     }
     return nbytes;
 }
@@ -181,7 +181,7 @@ int serial_close(int fd)
 {
     if (4 <= verbose_level)
     {
-	printf("\t\tClose port\n");
+        printf("\t\tClose port\n");
     }
     return close(fd);
 }
