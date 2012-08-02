@@ -118,24 +118,58 @@ int serial_write(int fd, const void *buf, int len)
 	}
 	printf("\n");
     }
-    return write(fd, buf, len);
+    int bytes_left = len;
+    int rc = 0;
+    unsigned char *pbuf = (unsigned char*)buf;
+    do
+    {
+	rc = write(fd, pbuf, bytes_left);
+	if (0 > rc)
+	{
+	    fprintf(stderr, "Failed to write to port.\n");
+	    return rc;
+	}
+	pbuf += rc;
+	bytes_left -= rc;
+    }
+    while (0 < bytes_left);
+    return len - bytes_left;
 }
 
 int serial_read(int fd, void *buf, int len)
 {
-    int rc = read(fd, buf, len);
+    int bytes_left = len;
+    int rc = 0;
+    unsigned char *pbuf = (unsigned char*)buf;
+    do
+    {
+	rc = read(fd, pbuf, bytes_left);
+	if (0 > rc)
+	{
+	    fprintf(stderr, "Failed to read from port.\n");
+	    return rc;
+	}
+	if (0 == rc)
+	{
+	    break;
+	}
+	pbuf += rc;
+	bytes_left -= rc;
+    }
+    while (0 < bytes_left);
+    const int nbytes = len - bytes_left;
     if (4 <= verbose_level)
     {
-	unsigned char *p = buf;
+	pbuf = buf;
 	unsigned int i;
-	printf("\t\trecv(%u): ", len);
-	for (i = rc; 0 < i; --i)
+	printf("\t\trecv(%u): ", nbytes);
+	for (i = nbytes; 0 < i; --i)
 	{
-	    printf("%02X ", *p++);
+	    printf("%02X ", *pbuf++);
 	}
 	printf("\n");
     }
-    return rc;
+    return nbytes;
 }
 
 int serial_sync(int fd)

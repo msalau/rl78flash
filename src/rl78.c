@@ -84,7 +84,6 @@ int rl78_send_cmd(int fd, int cmd, const void *data, int len)
     buf[len + 4] = ETX;
     int ret = serial_write(fd, buf, sizeof buf);
     // Read back echo
-    usleep(10000);
     int rc = serial_read(fd, buf, sizeof buf);
     return ret;
 }
@@ -103,7 +102,6 @@ int rl78_send_data(int fd, const void *data, int len, int last)
     buf[len + 3] = last ? ETX : ETB;
     int ret = serial_write(fd, buf, sizeof buf);
     // Read back echo
-    usleep(100000);
     int rc = serial_read(fd, buf, sizeof buf);
     return ret;
 }
