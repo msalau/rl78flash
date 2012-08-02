@@ -10,14 +10,15 @@ Usage
 
 user@host:~$ rl78flash -h
 rl78s [options] <port> [<file>]
-	-v	Verbose mode (several times increase verbose level)
-	-i	Dispaly info about mcu
-	-a	Auto mode (Erase-Write-Verify-Reset)
-	-e	Erase memory
-	-w	Write memory
-	-c	Verify memory
-	-r	Reset MCU (switch to RUN mode)
-	-h	Display help
+        -v      Verbose mode (several times increase verbose level)
+        -i      Dispaly info about mcu
+        -a      Auto mode (Erase-Write-Verify-Reset)
+        -e      Erase memory
+        -w      Write memory
+        -c      Verify memory
+        -r      Reset MCU (switch to RUN mode)
+        -b baud Set baudrate (supported baudrates: 115200, 500000, 1000000)
+        -h      Display help
 
 Typical invocation
 ------------------
@@ -35,7 +36,7 @@ Erase
 ...................................................................................
 ..............
 Read file "R5F100SL.mot"
-Program
+Write
 *
 Verify
 *..................................................................................
@@ -45,6 +46,18 @@ Verify
 ...................................................................................
 ...................................................................................
 ..............
+Reset MCU
+user@host:~$
+
+-or-
+
+user@host:~$ rl78flash -vviw /dev/ttyUSB0 R5F100SL.mot
+Device: R5F100SL
+Code size: 512 kB
+Data size: 8 kB
+Read file "R5F100SL.mot"
+Write
+*
 Reset MCU
 user@host:~$
 

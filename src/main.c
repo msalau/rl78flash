@@ -32,6 +32,7 @@ const char *usage =
     "\t-w\tWrite memory\n"
     "\t-c\tVerify memory\n"
     "\t-r\tReset MCU (switch to RUN mode)\n"
+    "\t-b baud\tSet baudrate (supported baudrates: 115200, 500000, 1000000)\n"
     "\t-h\tDisplay help\n";
 
 int main(int argc, char *argv[])
