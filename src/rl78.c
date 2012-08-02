@@ -26,7 +26,7 @@
 
 extern int verbose_level;
 
-int rl78_reset_init(int fd)
+int rl78_reset_init(int fd, int baud)
 {
     serial_set_dtr(fd, 0);
     serial_set_rts(fd, 0);
@@ -45,7 +45,7 @@ int rl78_reset_init(int fd)
     rc = serial_read(fd, &r, 1);
     serial_sync(fd);
     usleep(1000);
-    return rl78_cmd_baud_rate_set(fd, 115200, 3300);
+    return rl78_cmd_baud_rate_set(fd, baud, 3300);
 }
 
 int rl78_reset(int fd)
@@ -188,6 +188,7 @@ int rl78_cmd_baud_rate_set(int fd, int baud, int voltage)
     default:
         buf[0] = BAUD_115200;
         new_baud = B115200;
+        baud = 115200;
         break;
     /* case 250000:
      *  buf[0] = BAUD_250000;
@@ -227,6 +228,7 @@ int rl78_cmd_baud_rate_set(int fd, int baud, int voltage)
         printf("\tFrequency: %u MHz\n", data[1]);
         printf("\tMode: %s\n", 0 == data[2] ? "full-speed mode" : "wide-voltage mode");
     }
+    serial_set_baud(fd, new_baud);
     return 0;
 }
 

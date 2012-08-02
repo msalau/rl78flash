@@ -41,9 +41,11 @@ int main(int argc, char *argv[])
     char write = 0;
     char reset_after = 0;
     char display_info = 0;
+    int baud = 500000;
 
+    char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "avwcreih?")) != -1)
+    while ((opt = getopt(argc, argv, "ab:cvwreih?")) != -1)
     {
         switch (opt)
         {
@@ -52,6 +54,14 @@ int main(int argc, char *argv[])
             write = 1;
             verify = 1;
             reset_after = 1;
+            break;
+        case 'b':
+            baud = strtoul(optarg, &endp, 10);
+            if (optarg == endp)
+            {
+                printf("%s", usage);
+                return 0;
+            }
             break;
         case 'v':
             ++verbose_level;
@@ -126,9 +136,27 @@ int main(int argc, char *argv[])
         || 1 == verify
         || 1 == display_info)
     {
-        rl78_reset_init(fd);
-        rl78_cmd_reset(fd);
-        rl78_cmd_silicon_signature(fd, device_name, &code_size, &data_size);
+        rc = rl78_reset_init(fd, baud);
+        if (0 > rc)
+        {
+            fprintf(stderr, "Initialization failed\n");
+            serial_close(fd);
+            return rc;
+        }
+        rc = rl78_cmd_reset(fd);
+        if (0 > rc)
+        {
+            fprintf(stderr, "Synchronization failed\n");
+            serial_close(fd);
+            return rc;
+        }
+        rc = rl78_cmd_silicon_signature(fd, device_name, &code_size, &data_size);
+        if (0 > rc)
+        {
+            fprintf(stderr, "Silicon signature read failed\n");
+            serial_close(fd);
+            return rc;
+        }
     }
     if (1 == display_info)
     {
