@@ -184,11 +184,12 @@ int rl78_cmd_baud_rate_set(int fd, int baud, int voltage)
     int new_baud;
     switch (baud)
     {
-    case 115200:
     default:
+        fprintf(stderr, "Unsupported baudrate %ubps. Using default baudrate 115200bps.\n", baud);
+        baud = 115200;
+    case 115200:
         buf[0] = BAUD_115200;
         new_baud = B115200;
-        baud = 115200;
         break;
     /* case 250000:
      *  buf[0] = BAUD_250000;
