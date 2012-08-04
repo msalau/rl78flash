@@ -108,6 +108,7 @@ int main(int argc, char *argv[])
 
     // If no actions are specified - do nothing :)
     if (0 == write
+        && 0 == verify
         && 0 == erase
         && 0 == reset_after
         && 0 == display_info)
@@ -130,99 +131,102 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    char device_name[11];
-    unsigned int code_size, data_size;
-    if (1 == write
-        || 1 == erase
-        || 1 == verify
-        || 1 == display_info)
+    do
     {
+        if (0 == write
+            && 0 == erase
+            && 0 == verify
+            && 0 == display_info)
+        {
+            break;
+        }
         rc = rl78_reset_init(fd, baud);
         if (0 > rc)
         {
             fprintf(stderr, "Initialization failed\n");
-            serial_close(fd);
-            return rc;
+            break;
         }
         rc = rl78_cmd_reset(fd);
         if (0 > rc)
         {
             fprintf(stderr, "Synchronization failed\n");
-            serial_close(fd);
-            return rc;
+            break;
         }
+        char device_name[11];
+        unsigned int code_size, data_size;
         rc = rl78_cmd_silicon_signature(fd, device_name, &code_size, &data_size);
         if (0 > rc)
         {
             fprintf(stderr, "Silicon signature read failed\n");
-            serial_close(fd);
-            return rc;
+            break;
         }
-    }
-    if (1 == display_info)
-    {
-        printf("Device: %s\n"
-               "Code size: %u kB\n"
-               "Data size: %u kB\n",
-               device_name, code_size / 1024, data_size / 1024
-            );
-    }
-    if (1 == erase)
-    {
-        if (1 <= verbose_level)
+        if (1 == display_info)
         {
-            printf("Erase\n", filename);
+            printf("Device: %s\n"
+                   "Code size: %u kB\n"
+                   "Data size: %u kB\n",
+                   device_name, code_size / 1024, data_size / 1024
+                );
+        }
+        if (1 == erase)
+        {
+            if (1 <= verbose_level)
+            {
+                printf("Erase\n", filename);
+            }
+            rl78_erase(fd, code_size, data_size);
             if (0 != rc)
             {
                 fprintf(stderr, "Erase failed\n");
+                break;
             }
         }
-        rl78_erase(fd, code_size, data_size);
-    }
-    if (1 == write
-        || 1 == verify)
-    {
         unsigned char code[code_size];
         unsigned char data[data_size];
-        memset(code, 0xFF, sizeof code);
-        memset(data, 0xFF, sizeof data);
-        if (1 <= verbose_level)
+        if (1 == write
+            || 1 == verify)
         {
-            printf("Read file \"%s\"\n", filename);
-        }
-        rc = srec_read(filename, code, code_size, data, data_size);
-        if (0 == rc)
-        {
-            if (1 == write)
+            memset(code, 0xFF, sizeof code);
+            memset(data, 0xFF, sizeof data);
+            if (1 <= verbose_level)
             {
-                if (1 <= verbose_level)
-                {
-                    printf("Write\n");
-                }
-                rc = rl78_program(fd, code, code_size, data, data_size);
-                if (0 != rc)
-                {
-                    fprintf(stderr, "Write failed\n");
-                }
+                printf("Read file \"%s\"\n", filename);
             }
-            if (1 == verify)
+            rc = srec_read(filename, code, code_size, data, data_size);
+            if (0 != rc)
             {
-                if (1 <= verbose_level)
-                {
-                    printf("Verify\n");
-                }
-                rc = rl78_verify(fd, code, code_size, data, data_size);
-                if (0 != rc)
-                {
-                    fprintf(stderr, "Verify failed\n");
-                }
+                fprintf(stderr, "Read failed\n");
+                break;
             }
         }
-        else
+        if (1 == write)
         {
-            fprintf(stderr, "Read failed\n");
+            if (1 <= verbose_level)
+            {
+                printf("Write\n");
+            }
+            rc = rl78_program(fd, code, code_size, data, data_size);
+            if (0 != rc)
+            {
+                fprintf(stderr, "Write failed\n");
+                break;
+            }
+        }
+        if (1 == verify)
+        {
+            if (1 <= verbose_level)
+            {
+                printf("Verify\n");
+            }
+            rc = rl78_verify(fd, code, code_size, data, data_size);
+            if (0 != rc)
+            {
+                fprintf(stderr, "Verify failed\n");
+                break;
+            }
         }
     }
+    while (0);
     if (1 == reset_after)
     {
         if (1 <= verbose_level)
