@@ -33,6 +33,7 @@ const char *usage =
     "\t-c\tVerify memory\n"
     "\t-r\tReset MCU (switch to RUN mode)\n"
     "\t-b baud\tSet baudrate (supported baudrates: 115200, 500000, 1000000)\n"
+    "\t-m n\tSet communication mode (1: single-wire UART, 2: two-wire UART)\n"
     "\t-h\tDisplay help\n";
 
 int main(int argc, char *argv[])
@@ -42,11 +43,12 @@ int main(int argc, char *argv[])
     char write = 0;
     char reset_after = 0;
     char display_info = 0;
+    char mode = 1;
     int baud = 500000;
 
     char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "ab:cvwreih?")) != -1)
+    while ((opt = getopt(argc, argv, "ab:cvwreim:h?")) != -1)
     {
         switch (opt)
         {
@@ -58,6 +60,14 @@ int main(int argc, char *argv[])
             break;
         case 'b':
             baud = strtoul(optarg, &endp, 10);
+            if (optarg == endp)
+            {
+                printf("%s", usage);
+                return 0;
+            }
+            break;
+        case 'm':
+            mode = strtol(optarg, &endp, 10);
             if (optarg == endp)
             {
                 printf("%s", usage);
@@ -140,7 +150,7 @@ int main(int argc, char *argv[])
         {
             break;
         }
-        rc = rl78_reset_init(fd, baud);
+        rc = rl78_reset_init(fd, baud, mode);
         if (0 > rc)
         {
             fprintf(stderr, "Initialization failed\n");

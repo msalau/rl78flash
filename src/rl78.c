@@ -25,9 +25,29 @@
 #include <stdio.h>
 
 extern int verbose_level;
+static unsigned char communication_mode;
 
-int rl78_reset_init(int fd, int baud)
+int rl78_reset_init(int fd, int baud, int mode)
 {
+    unsigned char r;
+    if (1 == mode)
+    {
+        r = SET_MODE_1WIRE_UART;
+    }
+    else if (2 == mode)
+    {
+        r = SET_MODE_2WIRE_UART;
+    }
+    else
+    {
+        fprintf(stderr, "Unsupported mode %i\n", mode);
+        return -1;
+    }
+    communication_mode = mode;
+    if (4 <= verbose_level)
+    {
+        printf("Using communication mode %u\n", communication_mode);
+    }
     serial_set_dtr(fd, 0);
     serial_set_rts(fd, 0);
     usleep(1000);
@@ -36,13 +56,15 @@ int rl78_reset_init(int fd, int baud)
     serial_set_rts(fd, 1);                                  /* TOOL0 -> 1 */
     usleep(1000);
     int rc;
-    int r;
     if (3 <= verbose_level)
     {
-        printf("Send SYNC byte\n");
+        printf("Send 1-byte data for setting mode\n");
     }
-    rc = serial_write(fd, "\x3A", 1);
-    rc = serial_read(fd, &r, 1);
+    rc = serial_write(fd, &r, 1);
+    if (1 == communication_mode)
+    {
+        rc = serial_read(fd, &r, 1);
+    }
     serial_sync(fd);
     usleep(1000);
     return rl78_cmd_baud_rate_set(fd, baud, 3300);
@@ -84,7 +106,10 @@ int rl78_send_cmd(int fd, int cmd, const void *data, int len)
     buf[len + 4] = ETX;
     int ret = serial_write(fd, buf, sizeof buf);
     // Read back echo
-    int rc = serial_read(fd, buf, sizeof buf);
+    if (1 == communication_mode)
+    {
+        int rc = serial_read(fd, buf, sizeof buf);
+    }
     return ret;
 }
 
@@ -102,7 +127,10 @@ int rl78_send_data(int fd, const void *data, int len, int last)
     buf[len + 3] = last ? ETX : ETB;
     int ret = serial_write(fd, buf, sizeof buf);
     // Read back echo
-    int rc = serial_read(fd, buf, sizeof buf);
+    if (1 == communication_mode)
+    {
+        int rc = serial_read(fd, buf, sizeof buf);
+    }
     return ret;
 }
 

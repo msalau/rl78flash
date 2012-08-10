@@ -64,7 +64,10 @@
 #define RESPONSE_FORMAT_ERROR           (-2)
 #define RESPONSE_EXPECTED_LENGTH_ERROR  (-3)
 
-int rl78_reset_init(int fd, int baud);
+#define SET_MODE_1WIRE_UART 0x3A
+#define SET_MODE_2WIRE_UART 0x00
+
+int rl78_reset_init(int fd, int baud, int mode);
 int rl78_reset(int fd);
 int rl78_send_cmd(int fd, int cmd, const void *data, int len);
 int rl78_send_data(int fd, const void *data, int len, int last);
