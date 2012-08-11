@@ -67,13 +67,16 @@
 #define SET_MODE_1WIRE_UART 0x3A
 #define SET_MODE_2WIRE_UART 0x00
 
-int rl78_reset_init(int fd, int baud, int mode);
+#define RL78_MIN_VOLTAGE    1.8f
+#define RL78_MAX_VOLTAGE    5.5f
+
+int rl78_reset_init(int fd, int baud, int mode, float voltage);
 int rl78_reset(int fd);
 int rl78_send_cmd(int fd, int cmd, const void *data, int len);
 int rl78_send_data(int fd, const void *data, int len, int last);
 int rl78_recv(int fd, void *data, int *len, int explen);
 int rl78_cmd_reset(int fd);
-int rl78_cmd_baud_rate_set(int fd, int baud, int voltage);
+int rl78_cmd_baud_rate_set(int fd, int baud, float voltage);
 int rl78_cmd_silicon_signature(int fd, char device_name[11], unsigned int *code_size, unsigned int *data_size);
 int rl78_cmd_block_erase(int fd, unsigned int address);
 int rl78_cmd_block_blank_check(int fd, unsigned int address_start, unsigned int address_end);

@@ -22,6 +22,8 @@ rl78s [options] <port> [<file>]
                         default: 500000
         -m n    Set communication mode (1: single-wire UART, 2: two-wire UART)
                         default: 1 - single-wire UART
+        -p v    Specify power supply voltage
+                        default: 3.3
         -h      Display help
 
 Typical invocation

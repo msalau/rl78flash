@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include "rl78.h"
 
 int verbose_level = 0;
 
@@ -36,6 +37,8 @@ const char *usage =
     "\t\t\tdefault: 500000\n"
     "\t-m n\tSet communication mode (1: single-wire UART, 2: two-wire UART)\n"
     "\t\t\tdefault: 1 - single-wire UART\n"
+    "\t-p v\tSpecify power supply voltage\n"
+    "\t\t\tdefault: 3.3\n"
     "\t-h\tDisplay help\n";
 
 int main(int argc, char *argv[])
@@ -47,10 +50,11 @@ int main(int argc, char *argv[])
     char display_info = 0;
     char mode = 1;
     int baud = 500000;
+    float voltage = 3.3f;
 
     char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "ab:cvwreim:h?")) != -1)
+    while ((opt = getopt(argc, argv, "ab:cvwreim:p:h?")) != -1)
     {
         switch (opt)
         {
@@ -73,6 +77,20 @@ int main(int argc, char *argv[])
             if (optarg == endp)
             {
                 printf("%s", usage);
+                return 0;
+            }
+            break;
+        case 'p':
+            if (1 != sscanf(optarg, "%f", &voltage))
+            {
+                printf("%s", usage);
+                return 0;
+            }
+            if (RL78_MIN_VOLTAGE > voltage
+                || RL78_MAX_VOLTAGE < voltage )
+            {
+                fprintf(stderr, "Operating voltage is out of range. Operating voltage must be in range %1.1fV..%1.1fV.\n",
+                        RL78_MIN_VOLTAGE, RL78_MAX_VOLTAGE);
                 return 0;
             }
             break;
@@ -152,7 +170,7 @@ int main(int argc, char *argv[])
         {
             break;
         }
-        rc = rl78_reset_init(fd, baud, mode);
+        rc = rl78_reset_init(fd, baud, mode, voltage);
         if (0 > rc)
         {
             fprintf(stderr, "Initialization failed\n");

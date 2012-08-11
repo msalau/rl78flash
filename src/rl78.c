@@ -27,7 +27,7 @@
 extern int verbose_level;
 static unsigned char communication_mode;
 
-int rl78_reset_init(int fd, int baud, int mode)
+int rl78_reset_init(int fd, int baud, int mode, float voltage)
 {
     unsigned char r;
     if (1 == mode)
@@ -67,7 +67,7 @@ int rl78_reset_init(int fd, int baud, int mode)
     }
     serial_sync(fd);
     usleep(1000);
-    return rl78_cmd_baud_rate_set(fd, baud, 3300);
+    return rl78_cmd_baud_rate_set(fd, baud, voltage);
 }
 
 int rl78_reset(int fd)
@@ -206,7 +206,7 @@ int rl78_cmd_reset(int fd)
     return 0;
 }
 
-int rl78_cmd_baud_rate_set(int fd, int baud, int voltage)
+int rl78_cmd_baud_rate_set(int fd, int baud, float voltage)
 {
     unsigned char buf[2];
     int new_baud;
@@ -232,10 +232,10 @@ int rl78_cmd_baud_rate_set(int fd, int baud, int voltage)
         new_baud = B1000000;
         break;
     }
-    buf[1] = voltage / 100;
+    buf[1] = (int)(voltage * 10);
     if (3 <= verbose_level)
     {
-        printf("Send \"Set Baud Rate\" command (baud=%ubps, voltage=%1.1fV)\n", baud, (float)voltage/1000);
+        printf("Send \"Set Baud Rate\" command (baud=%ubps, voltage=%1.1fV)\n", baud, voltage);
     }
     rl78_send_cmd(fd, CMD_BAUD_RATE_SET, buf, 2);
     int len = 0;
