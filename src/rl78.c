@@ -219,18 +219,24 @@ int rl78_cmd_baud_rate_set(int fd, int baud, float voltage)
         buf[0] = BAUD_115200;
         new_baud = B115200;
         break;
-    /* case 250000:
-     *  buf[0] = BAUD_250000;
-     *  new_baud = B250000;
-     *  break; */
+#ifdef B250000
+    case 250000:
+        buf[0] = BAUD_250000;
+        new_baud = B250000;
+        break;
+#endif
+#ifdef B500000
     case 500000:
         buf[0] = BAUD_500000;
         new_baud = B500000;
         break;
+#endif
+#ifdef B1000000
     case 1000000:
         buf[0] = BAUD_1000000;
         new_baud = B1000000;
         break;
+#endif
     }
     buf[1] = (int)(voltage * 10);
     if (3 <= verbose_level)

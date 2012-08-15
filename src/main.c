@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <termios.h>
 #include <string.h>
 #include "rl78.h"
 
@@ -33,8 +34,18 @@ const char *usage =
     "\t-w\tWrite memory\n"
     "\t-c\tVerify memory\n"
     "\t-r\tReset MCU (switch to RUN mode)\n"
-    "\t-b baud\tSet baudrate (supported baudrates: 115200, 500000, 1000000)\n"
-    "\t\t\tdefault: 500000\n"
+    "\t-b baud\tSet baudrate (supported baudrates: 115200"
+#ifdef B250000
+    ", 250000"
+#endif
+#ifdef B500000
+    ", 500000"
+#endif
+#ifdef B1000000
+    ", 1000000"
+#endif
+    ")\n"
+    "\t\t\tdefault: 115200\n"
     "\t-m n\tSet communication mode (1: single-wire UART, 2: two-wire UART)\n"
     "\t\t\tdefault: 1 - single-wire UART\n"
     "\t-p v\tSpecify power supply voltage\n"
@@ -49,7 +60,7 @@ int main(int argc, char *argv[])
     char reset_after = 0;
     char display_info = 0;
     char mode = 1;
-    int baud = 500000;
+    int baud = 115200;
     float voltage = 3.3f;
 
     char *endp;
