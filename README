@@ -12,7 +12,7 @@ Usage
 user@host:~$ rl78flash -h
 rl78s [options] <port> [<file>]
         -v      Verbose mode (several times increase verbose level)
-        -i      Dispaly info about mcu
+        -i      Dispaly info about MCU
         -a      Auto mode (Erase-Write-Verify-Reset)
         -e      Erase memory
         -w      Write memory
@@ -24,7 +24,17 @@ rl78s [options] <port> [<file>]
                         default: 1 - single-wire UART
         -p v    Specify power supply voltage
                         default: 3.3
+        -t baud Start terminal with specified baudrate
         -h      Display help
+
+Program flow
+------------
+
+Erase -> Write -> Verify -> Reset -> Terminal
+
+If terminal is enabled, reset is issued regardless of 'Reset MCU' option. Upon
+termination of terminal, MCU is left running without restarting firmware regardless
+of 'Reset MCU' option.
 
 Typical invocation
 ------------------
