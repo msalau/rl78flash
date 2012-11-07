@@ -21,6 +21,7 @@
 #include "rl78.h"
 #include <unistd.h>
 #include <termios.h>
+#include <sys/ioctl.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -48,12 +49,13 @@ int rl78_reset_init(int fd, int baud, int mode, float voltage)
     {
         printf("Using communication mode %u\n", communication_mode);
     }
+    serial_set_rts(fd, 1);                                  /* Set RTS constant high */
     serial_set_dtr(fd, 0);
-    serial_set_rts(fd, 0);
+    ioctl(fd, TIOCSBRK);                                    /* TOOL0 -> 0 */
     usleep(1000);
     serial_set_dtr(fd, 1);                                  /* RESET -> 1 */
     usleep(10);
-    serial_set_rts(fd, 1);                                  /* TOOL0 -> 1 */
+    ioctl(fd, TIOCCBRK);                                    /* TOOL0 -> 1 */
     usleep(1000);
     int rc;
     if (3 <= verbose_level)
@@ -72,7 +74,8 @@ int rl78_reset_init(int fd, int baud, int mode, float voltage)
 
 int rl78_reset(int fd)
 {
-    serial_set_rts(fd, 1);                                  /* TOOL0 -> 1 */
+    serial_set_rts(fd, 1);                                  /* Set RTS constant high */
+    ioctl(fd, TIOCCBRK);                                    /* TOOL0 -> 1 */
     serial_set_dtr(fd, 0);                                  /* RESET -> 0 */
     usleep(10000);
     serial_set_dtr(fd, 1);                                  /* RESET -> 1 */
