@@ -46,8 +46,12 @@ const char *usage =
 #endif
     ")\n"
     "\t\t\tdefault: 115200\n"
-    "\t-m n\tSet communication mode (1: single-wire UART, 2: two-wire UART)\n"
-    "\t\t\tdefault: 1 - single-wire UART\n"
+    "\t-m n\tSet communication mode\n"
+    "\t\t\tn=1 Single-wire UART, Reset by DTR\n"
+    "\t\t\tn=2 Two-wire UART, Reset by DTR\n"
+    "\t\t\tn=3 Single-wire UART, Reset by RTS\n"
+    "\t\t\tn=4 Two-wire UART, Reset by RTS\n"
+    "\t\t\tdefault: n=1\n"
     "\t-p v\tSpecify power supply voltage\n"
     "\t\t\tdefault: 3.3\n"
     "\t-t baud\tStart terminal with specified baudrate\n"
@@ -69,7 +73,7 @@ int main(int argc, char *argv[])
     char write = 0;
     char reset_after = 0;
     char display_info = 0;
-    char mode = 1;
+    char mode = 0;
     int baud = 115200;
     float voltage = 3.3f;
     char terminal = 0;
@@ -96,8 +100,10 @@ int main(int argc, char *argv[])
             }
             break;
         case 'm':
-            mode = strtol(optarg, &endp, 10);
-            if (optarg == endp)
+            mode = strtol(optarg, &endp, 10) - 1;
+            if (optarg == endp
+                || MODE_MAX_VALUE < mode
+                || MODE_MIN_VALUE > mode)
             {
                 printf("%s", usage);
                 return 0;
@@ -318,7 +324,7 @@ int main(int argc, char *argv[])
             {
                 printf("Start terminal\n");
             }
-            terminal_start(fd, terminal_baud);
+            terminal_start(fd, terminal_baud, mode);
         }
         else if (1 == reset_after)
         {
@@ -326,7 +332,7 @@ int main(int argc, char *argv[])
             {
                 printf("Reset MCU\n");
             }
-            rl78_reset(fd);
+            rl78_reset(fd, mode);
         }
     }
     while (0);

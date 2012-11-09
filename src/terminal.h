@@ -20,6 +20,6 @@
 #ifndef TERMINAL_H__
 #define TERMINAL_H__
 
-void terminal_start(int fd, int baud);
+void terminal_start(int fd, int baud, int mode);
 
 #endif  /* TERMINAL_H__ */

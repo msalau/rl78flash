@@ -70,8 +70,17 @@
 #define RL78_MIN_VOLTAGE    1.8f
 #define RL78_MAX_VOLTAGE    5.5f
 
+#define MODE_UART      1
+#define MODE_UART_1    0
+#define MODE_UART_2    MODE_UART
+#define MODE_RESET     2
+#define MODE_RESET_DTR 0
+#define MODE_RESET_RTS MODE_RESET
+#define MODE_MAX_VALUE (MODE_UART | MODE_RESET)
+#define MODE_MIN_VALUE 0
+
 int rl78_reset_init(int fd, int baud, int mode, float voltage);
-int rl78_reset(int fd);
+int rl78_reset(int fd, int mode);
 int rl78_send_cmd(int fd, int cmd, const void *data, int len);
 int rl78_send_data(int fd, const void *data, int len, int last);
 int rl78_recv(int fd, void *data, int *len, int explen);

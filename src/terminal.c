@@ -70,7 +70,7 @@ const baudrate_code_t baudrates[] =
     { 0, 0}
 };
 
-void terminal_start(int fd, int baud)
+void terminal_start(int fd, int baud, int mode)
 {
     pthread_t receiver;
     char c = 0;
@@ -99,7 +99,7 @@ void terminal_start(int fd, int baud)
     serial_set_baud(fd, pbaud->code);
     pthread_create(&receiver, NULL, receiver_func, &fd);
     serial_flush(fd);
-    rl78_reset(fd);
+    rl78_reset(fd, mode);
     for (;;)
     {
         if (1 == read(STDIN_FILENO, &c, 1))

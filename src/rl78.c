@@ -28,32 +28,39 @@
 extern int verbose_level;
 static unsigned char communication_mode;
 
-int rl78_reset_init(int fd, int baud, int mode, float voltage)
+static void rl78_set_reset(int fd, int mode, int value)
 {
-    unsigned char r;
-    if (1 == mode)
+    if (MODE_RESET_RTS == (mode & MODE_RESET))
     {
-        r = SET_MODE_1WIRE_UART;
-    }
-    else if (2 == mode)
-    {
-        r = SET_MODE_2WIRE_UART;
+        serial_set_rts(fd, value);
     }
     else
     {
-        fprintf(stderr, "Unsupported mode %i\n", mode);
-        return -1;
+        serial_set_dtr(fd, value);
     }
-    communication_mode = mode;
+}
+
+int rl78_reset_init(int fd, int baud, int mode, float voltage)
+{
+    unsigned char r;
+    if (MODE_UART_1 == (mode & MODE_UART))
+    {
+        r = SET_MODE_1WIRE_UART;
+        communication_mode = 1;
+    }
+    else
+    {
+        r = SET_MODE_2WIRE_UART;
+        communication_mode = 2;
+    }
     if (4 <= verbose_level)
     {
-        printf("Using communication mode %u\n", communication_mode);
+        printf("Using communication mode %u\n", mode + 1);
     }
-    serial_set_rts(fd, 1);                                  /* Set RTS constant high */
-    serial_set_dtr(fd, 0);
+    rl78_set_reset(fd, mode, 0);                            /* RESET -> 0 */
     ioctl(fd, TIOCSBRK);                                    /* TOOL0 -> 0 */
     usleep(1000);
-    serial_set_dtr(fd, 1);                                  /* RESET -> 1 */
+    rl78_set_reset(fd, mode, 1);                            /* RESET -> 1 */
     usleep(10);
     ioctl(fd, TIOCCBRK);                                    /* TOOL0 -> 1 */
     usleep(1000);
@@ -72,13 +79,12 @@ int rl78_reset_init(int fd, int baud, int mode, float voltage)
     return rl78_cmd_baud_rate_set(fd, baud, voltage);
 }
 
-int rl78_reset(int fd)
+int rl78_reset(int fd, int mode)
 {
-    serial_set_rts(fd, 1);                                  /* Set RTS constant high */
     ioctl(fd, TIOCCBRK);                                    /* TOOL0 -> 1 */
-    serial_set_dtr(fd, 0);                                  /* RESET -> 0 */
+    rl78_set_reset(fd, mode, 0);                            /* RESET -> 0 */
     usleep(10000);
-    serial_set_dtr(fd, 1);                                  /* RESET -> 1 */
+    rl78_set_reset(fd, mode, 1);                            /* RESET -> 1 */
     return 0;
 }
 
