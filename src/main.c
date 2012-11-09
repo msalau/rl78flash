@@ -214,6 +214,9 @@ int main(int argc, char *argv[])
     tattr.c_cc[VTIME] = 0;
     tcsetattr(STDOUT_FILENO, TCSAFLUSH, &tattr);
 
+    /* Disable buffering for stdout */
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     // If no actions are specified - do nothing :)
     if (0 == write
         && 0 == verify
