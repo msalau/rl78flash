@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
             {
                 if (1 <= verbose_level)
                 {
-                    printf("Erase %s\n", filename);
+                    printf("Erase\n");
                 }
                 rl78_erase(fd, code_size, data_size);
                 if (0 != rc)
