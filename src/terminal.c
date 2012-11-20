@@ -49,6 +49,7 @@ static void * receiver_func(void * pfd)
             prev = c;
         }
     }
+    return NULL;
 }
 
 typedef struct {

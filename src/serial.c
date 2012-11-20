@@ -21,6 +21,7 @@
 #include <termios.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 #include <stdio.h>
 
 extern int verbose_level;
@@ -61,7 +62,7 @@ int serial_open(const char *port)
 int serial_flush(int fd)
 {
     serial_sync(fd);
-    ioctl(fd, TCFLSH, TCIFLUSH);
+    return ioctl(fd, TCFLSH, TCIFLUSH);
 }
 
 int serial_set_baud(int fd, int baud)
@@ -70,7 +71,7 @@ int serial_set_baud(int fd, int baud)
     tcgetattr(fd, &options);
     cfsetispeed(&options, baud);
     cfsetospeed(&options, baud);
-    tcsetattr(fd, TCSANOW, &options);
+    return tcsetattr(fd, TCSANOW, &options);
 }
 
 int serial_set_dtr(int fd, int level)

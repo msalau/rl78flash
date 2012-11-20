@@ -64,15 +64,14 @@ int rl78_reset_init(int fd, int baud, int mode, float voltage)
     usleep(10);
     ioctl(fd, TIOCCBRK);                                    /* TOOL0 -> 1 */
     usleep(1000);
-    int rc;
     if (3 <= verbose_level)
     {
         printf("Send 1-byte data for setting mode\n");
     }
-    rc = serial_write(fd, &r, 1);
+    serial_write(fd, &r, 1);
     if (1 == communication_mode)
     {
-        rc = serial_read(fd, &r, 1);
+        serial_read(fd, &r, 1);
     }
     serial_sync(fd);
     usleep(1000);
@@ -117,7 +116,7 @@ int rl78_send_cmd(int fd, int cmd, const void *data, int len)
     // Read back echo
     if (1 == communication_mode)
     {
-        int rc = serial_read(fd, buf, sizeof buf);
+        serial_read(fd, buf, sizeof buf);
     }
     return ret;
 }
@@ -138,7 +137,7 @@ int rl78_send_data(int fd, const void *data, int len, int last)
     // Read back echo
     if (1 == communication_mode)
     {
-        int rc = serial_read(fd, buf, sizeof buf);
+        serial_read(fd, buf, sizeof buf);
     }
     return ret;
 }
@@ -146,10 +145,9 @@ int rl78_send_data(int fd, const void *data, int len, int last)
 int rl78_recv(int fd, void *data, int *len, int explen)
 {
     unsigned char in[MAX_RESPONSE_LENGTH];
-    int rc;
     int data_len;
     // receive header
-    rc = serial_read(fd, in, 2);
+    serial_read(fd, in, 2);
     data_len = in[1];
     if (0 == data_len)
     {
@@ -167,7 +165,7 @@ int rl78_recv(int fd, void *data, int *len, int explen)
         return RESPONSE_EXPECTED_LENGTH_ERROR;
     }
     // receive data field, checksum and footer byte
-    rc = serial_read(fd, in + 2, data_len + 2);
+    serial_read(fd, in + 2, data_len + 2);
     switch (in[data_len + 3])
     {
     case ETB:
@@ -567,7 +565,6 @@ int rl78_cmd_verify(int fd, unsigned int address_start, unsigned int address_end
     unsigned int rom_length = address_end - address_start + 1;
     unsigned char *rom_p = (unsigned char*)rom;
     unsigned int address_current = address_start;
-    unsigned int final_delay = (rom_length / 1024 + 1) * 1500;
     // Send data
     while (rom_length)
     {
@@ -633,6 +630,9 @@ int allFFs(const void *mem, unsigned int size)
 
 int rl78_program(int fd, void *code, unsigned int code_size, void *data, unsigned int data_size)
 {
+    // Suppress  "unused variable" warnings
+    (void)data;
+    (void)data_size;
     // Make sure size is aligned to flash block boundary
     unsigned int i = code_size & ~(FLASH_BLOCK_SIZE - 1);
     unsigned char *mem = (unsigned char*)code;
@@ -698,6 +698,8 @@ int rl78_program(int fd, void *code, unsigned int code_size, void *data, unsigne
 
 int rl78_erase(int fd, unsigned int code_size, unsigned int data_size)
 {
+    // Suppress  "unused variable" warnings
+    (void)data_size;
     // Make sure size is aligned to flash block boundary
     unsigned int i = code_size & ~(FLASH_BLOCK_SIZE - 1);
     unsigned int address = CODE_OFFSET;
@@ -747,6 +749,9 @@ int rl78_erase(int fd, unsigned int code_size, unsigned int data_size)
 
 int rl78_verify(int fd, void *code, unsigned int code_size, void *data, unsigned int data_size)
 {
+    // Suppress  "unused variable" warnings
+    (void)data;
+    (void)data_size;
     // Make sure size is aligned to flash block boundary
     unsigned int i = code_size & ~(FLASH_BLOCK_SIZE - 1);
     unsigned char *mem = (unsigned char*)code;

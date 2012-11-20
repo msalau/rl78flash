@@ -102,10 +102,8 @@ int srec_read(const char *filename,
         const int data_length = ascii2hex(&line[2], 2) - address_length / 2 - 1; // in bytes
         const char *data_p = line + 4 + address_length;
         unsigned char *memory;
-        unsigned int memory_offset;
 
-        if (CODE_OFFSET <= address
-            && (CODE_OFFSET + code_len) > (address + data_length))
+        if ((CODE_OFFSET + code_len) > (address + data_length))
         {
             if (NULL == code)
             {

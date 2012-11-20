@@ -18,10 +18,14 @@
  *********************************************************************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <termios.h>
 #include <string.h>
 #include "rl78.h"
+#include "serial.h"
+#include "srec.h"
+#include "terminal.h"
 
 int verbose_level = 0;
 
@@ -267,7 +271,7 @@ int main(int argc, char *argv[])
             {
                 if (1 <= verbose_level)
                 {
-                    printf("Erase\n", filename);
+                    printf("Erase %s\n", filename);
                 }
                 rl78_erase(fd, code_size, data_size);
                 if (0 != rc)

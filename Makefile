@@ -1,4 +1,4 @@
-CFLAGS = -O2
+CFLAGS = -O2 -Wall -Wextra
 LDFLAGS += -lpthread
 
 rl78flash: src/rl78.o src/serial.o src/main.o src/srec.o src/terminal.o
