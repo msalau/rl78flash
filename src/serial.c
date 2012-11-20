@@ -86,8 +86,7 @@ int serial_set_dtr(int fd, int level)
     {
         status |= TIOCM_DTR;
     }
-    ioctl(fd, TIOCMSET, &status);
-    return level;
+    return ioctl(fd, TIOCMSET, &status);
 }
 
 int serial_set_rts(int fd, int level)
@@ -102,8 +101,21 @@ int serial_set_rts(int fd, int level)
     {
         status |= TIOCM_RTS;
     }
-    ioctl(fd, TIOCMSET, &status);
-    return level;
+    return ioctl(fd, TIOCMSET, &status);
+}
+
+int serial_set_txd(int fd, int level)
+{
+    int command;
+    if (level)
+    {
+        command = TIOCCBRK;
+    }
+    else
+    {
+        command = TIOCSBRK;
+    }
+    return ioctl(fd, command);
 }
 
 int serial_write(int fd, const void *buf, int len)
