@@ -21,7 +21,7 @@ rl78s [options] <port> [<file>]
         -w      Write memory
         -c      Verify memory
         -r      Reset MCU (switch to RUN mode)
-        -b baud Set baudrate (supported baudrates: 115200, 500000, 1000000)
+        -b baud Set baudrate (supported baudrates: 115200, 250000, 500000, 1000000)
                         default: 115200
         -m n    Set communication mode
                         n=1 Single-wire UART, Reset by DTR

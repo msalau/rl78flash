@@ -38,17 +38,7 @@ const char *usage =
     "\t-w\tWrite memory\n"
     "\t-c\tVerify memory\n"
     "\t-r\tReset MCU (switch to RUN mode)\n"
-    "\t-b baud\tSet baudrate (supported baudrates: 115200"
-#ifdef B250000
-    ", 250000"
-#endif
-#ifdef B500000
-    ", 500000"
-#endif
-#ifdef B1000000
-    ", 1000000"
-#endif
-    ")\n"
+    "\t-b baud\tSet baudrate (supported baudrates: 115200, 250000, 500000, 1000000)\n"
     "\t\t\tdefault: 115200\n"
     "\t-m n\tSet communication mode\n"
     "\t\t\tn=1 Single-wire UART, Reset by DTR\n"

@@ -18,6 +18,7 @@
  *********************************************************************************************************************/
 
 #include "serial.h"
+#include "rl78.h"
 #include <termios.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -67,10 +68,35 @@ int serial_flush(int fd)
 
 int serial_set_baud(int fd, int baud)
 {
+    int new_baud;
+    switch (baud)
+    {
+    case BAUD_115200:
+        new_baud = B115200;
+        break;
+#ifdef B250000
+    case BAUD_250000:
+        new_baud = B250000;
+        break;
+#endif
+#ifdef B500000
+    case BAUD_500000:
+        new_baud = B500000;
+        break;
+#endif
+#ifdef B1000000
+    case BAUD_1000000:
+        new_baud = B1000000;
+        break;
+#endif
+    default:
+        fprintf(stderr, "Selected baudrate is not supported on your platform\n");
+        return -1;
+    }
     struct termios options;
     tcgetattr(fd, &options);
-    cfsetispeed(&options, baud);
-    cfsetospeed(&options, baud);
+    cfsetispeed(&options, new_baud);
+    cfsetospeed(&options, new_baud);
     return tcsetattr(fd, TCSANOW, &options);
 }
 
