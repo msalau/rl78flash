@@ -23,6 +23,7 @@
 int serial_open(const char *port);
 int serial_set_baud(int fd, int baud);
 int serial_set_dtr(int fd, int level);
+int serial_set_rts(int fd, int level);
 int serial_write(int fd, const void *buf, int len);
 int serial_read(int fd, void *buf, int len);
 int serial_sync(int fd);
