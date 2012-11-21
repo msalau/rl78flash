@@ -73,7 +73,7 @@ int serial_set_baud(int fd, int baud)
     {
     case BAUD_115200:
         new_baud = B115200;
-        break;
+        return 0;
 #ifdef B250000
     case BAUD_250000:
         new_baud = B250000;
