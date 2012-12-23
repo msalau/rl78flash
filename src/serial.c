@@ -102,32 +102,32 @@ int serial_set_baud(int fd, int baud)
 
 int serial_set_dtr(int fd, int level)
 {
-    int status;
-    ioctl(fd, TIOCMGET, &status);
+    int command;
+    const int dtr = TIOCM_DTR;
     if (level)
     {
-        status &= ~TIOCM_DTR;
+        command = TIOCMBIC;
     }
     else
     {
-        status |= TIOCM_DTR;
+        command = TIOCMBIS;
     }
-    return ioctl(fd, TIOCMSET, &status);
+    return ioctl(fd, command, &dtr);
 }
 
 int serial_set_rts(int fd, int level)
 {
-    int status;
-    ioctl(fd, TIOCMGET, &status);
+    int command;
+    const int rts = TIOCM_RTS;
     if (level)
     {
-        status &= ~TIOCM_RTS;
+        command = TIOCMBIC;
     }
     else
     {
-        status |= TIOCM_RTS;
+        command = TIOCMBIS;
     }
-    return ioctl(fd, TIOCMSET, &status);
+    return ioctl(fd, command, &rts);
 }
 
 int serial_set_txd(int fd, int level)
