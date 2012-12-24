@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <termios.h>
 #include <string.h>
 #include "rl78.h"
 #include "serial.h"
@@ -50,15 +49,6 @@ const char *usage =
     "\t\t\tdefault: 3.3\n"
     "\t-t baud\tStart terminal with specified baudrate\n"
     "\t-h\tDisplay help\n";
-
-struct termios stdin_saved_attributes;
-struct termios stdout_saved_attributes;
-
-void restore_io_mode(void)
-{
-    tcsetattr (STDIN_FILENO, TCSANOW, &stdin_saved_attributes);
-    tcsetattr (STDOUT_FILENO, TCSANOW, &stdout_saved_attributes);
-}
 
 int main(int argc, char *argv[])
 {
@@ -179,37 +169,6 @@ int main(int argc, char *argv[])
     {
         return -1;
     }
-
-    /* Make sure stdin is a terminal. */
-    if (!isatty(STDIN_FILENO))
-    {
-        fprintf(stderr, "Not a terminal.\n");
-        return -1;
-    }
-
-    /* Save the terminal attributes so we can restore them later. */
-    tcgetattr(STDIN_FILENO, &stdin_saved_attributes);
-    tcgetattr(STDOUT_FILENO, &stdout_saved_attributes);
-    atexit(restore_io_mode);
-
-    struct termios tattr;
-
-    /* Disable canonical mode for stdin */
-    tcgetattr(STDIN_FILENO, &tattr);
-    tattr.c_lflag &= ~ICANON;
-    tattr.c_cc[VMIN] = 1;
-    tattr.c_cc[VTIME] = 0;
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &tattr);
-
-    /* Disable canonical mode for stdout */
-    tcgetattr(STDOUT_FILENO, &tattr);
-    tattr.c_lflag &= ~ICANON;
-    tattr.c_cc[VMIN] = 1;
-    tattr.c_cc[VTIME] = 0;
-    tcsetattr(STDOUT_FILENO, TCSAFLUSH, &tattr);
-
-    /* Disable buffering for stdout */
-    setvbuf(stdout, NULL, _IONBF, 0);
 
     // If no actions are specified - do nothing :)
     if (0 == write

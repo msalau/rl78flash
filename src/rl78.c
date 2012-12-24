@@ -666,6 +666,7 @@ int rl78_program(int fd, void *code, unsigned int code_size, void *data, unsigne
             if (2 == verbose_level)
             {
                 printf("*");
+                fflush(stdout);
             }
         }
         else
@@ -717,6 +718,7 @@ int rl78_erase(int fd, unsigned int code_size, unsigned int data_size)
             if (2 == verbose_level)
             {
                 printf("*");
+                fflush(stdout);
             }
         }
         else
@@ -725,6 +727,7 @@ int rl78_erase(int fd, unsigned int code_size, unsigned int data_size)
             if (2 == verbose_level)
             {
                 printf(".");
+                fflush(stdout);
             }
         }
         address += FLASH_BLOCK_SIZE;
@@ -773,6 +776,7 @@ int rl78_verify(int fd, void *code, unsigned int code_size, void *data, unsigned
             if (2 == verbose_level)
             {
                 printf(".");
+                fflush(stdout);
             }
         }
         else
@@ -787,6 +791,7 @@ int rl78_verify(int fd, void *code, unsigned int code_size, void *data, unsigned
             if (2 == verbose_level)
             {
                 printf("*");
+                fflush(stdout);
             }
         }
         mem += FLASH_BLOCK_SIZE;

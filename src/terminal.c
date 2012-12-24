@@ -46,6 +46,7 @@ static void * receiver_func(void * pfd)
                 printf("[%ld.%ld] ", tv.tv_sec, tv.tv_usec);
             }
             putchar(c);
+            fflush(stdout);
             prev = c;
         }
     }
@@ -57,11 +58,19 @@ void terminal_start(int fd, int baud, int mode)
     pthread_t receiver;
     char c = 0;
 
+    /* Make sure stdin is a terminal. */
+    if (!isatty(STDIN_FILENO))
+    {
+        fprintf(stderr, "Not a terminal.\n");
+        return;
+    }
     /* Disable processing of signal characters
-     * SIGINT character will be processed in software */
-    struct termios tattr;
+     * SIGINT character will be processed in software
+     * Also disable canonical mode. */
+    struct termios tattr, tattr_backup;
     tcgetattr(STDIN_FILENO, &tattr);
-    tattr.c_lflag &= ~ISIG;
+    tattr_backup = tattr;
+    tattr.c_lflag &= ~(ISIG | ICANON);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &tattr);
 
     serial_set_baud(fd, baud);
@@ -80,4 +89,5 @@ void terminal_start(int fd, int baud, int mode)
         }
     }
     pthread_cancel(receiver);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &tattr_backup);
 }
