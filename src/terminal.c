@@ -52,43 +52,10 @@ static void * receiver_func(void * pfd)
     return NULL;
 }
 
-typedef struct {
-    int baudrate;
-    int code;
-} baudrate_code_t;
-
-const baudrate_code_t baudrates[] =
-{
-    { 9600,    B9600 },
-    { 19200,   B19200 },
-    { 38400,   B38400 },
-    { 57600,   B57600 },
-    { 115200,  B115200 },
-    { 230400,  B230400 },
-    { 500000,  B500000 },
-    { 921600,  B921600 },
-    { 1000000, B1000000 },
-    { 0, 0}
-};
-
 void terminal_start(int fd, int baud, int mode)
 {
     pthread_t receiver;
     char c = 0;
-    const baudrate_code_t *pbaud = baudrates;
-    while (0 != pbaud->baudrate)
-    {
-        if (pbaud->baudrate == baud)
-        {
-            break;
-        }
-        ++pbaud;
-    }
-    if (0 == pbaud->code)
-    {
-        fprintf(stderr, "Failed to set baudrate %u\n", baud);
-        return;
-    }
 
     /* Disable processing of signal characters
      * SIGINT character will be processed in software */
@@ -97,7 +64,7 @@ void terminal_start(int fd, int baud, int mode)
     tattr.c_lflag &= ~ISIG;
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &tattr);
 
-    serial_set_baud(fd, pbaud->code);
+    serial_set_baud(fd, baud);
     pthread_create(&receiver, NULL, receiver_func, &fd);
     serial_flush(fd);
     rl78_reset(fd, mode);

@@ -66,37 +66,45 @@ int serial_flush(int fd)
     return ioctl(fd, TCFLSH, TCIFLUSH);
 }
 
+typedef struct {
+    int baudrate;
+    int code;
+} baudrate_code_t;
+
+const baudrate_code_t baudrates[] =
+{
+    { 9600,    B9600 },
+    { 19200,   B19200 },
+    { 38400,   B38400 },
+    { 57600,   B57600 },
+    { 115200,  B115200 },
+    { 230400,  B230400 },
+    { 500000,  B500000 },
+    { 921600,  B921600 },
+    { 1000000, B1000000 },
+    { 0, 0}
+};
+
 int serial_set_baud(int fd, int baud)
 {
-    int new_baud;
-    switch (baud)
+    const baudrate_code_t *pbaud = baudrates;
+    while (0 != pbaud->baudrate)
     {
-    case BAUD_115200:
-        new_baud = B115200;
-        return 0;
-#ifdef B250000
-    case BAUD_250000:
-        new_baud = B250000;
-        break;
-#endif
-#ifdef B500000
-    case BAUD_500000:
-        new_baud = B500000;
-        break;
-#endif
-#ifdef B1000000
-    case BAUD_1000000:
-        new_baud = B1000000;
-        break;
-#endif
-    default:
-        fprintf(stderr, "Selected baudrate is not supported on your platform\n");
+        if (pbaud->baudrate == baud)
+        {
+            break;
+        }
+        ++pbaud;
+    }
+    if (0 == pbaud->code)
+    {
+        fprintf(stderr, "Failed to set baudrate %u\n", baud);
         return -1;
     }
     struct termios options;
     tcgetattr(fd, &options);
-    cfsetispeed(&options, new_baud);
-    cfsetospeed(&options, new_baud);
+    cfsetispeed(&options, pbaud->code);
+    cfsetospeed(&options, pbaud->code);
     return tcsetattr(fd, TCSANOW, &options);
 }
 

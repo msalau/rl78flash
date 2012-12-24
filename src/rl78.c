@@ -20,7 +20,6 @@
 #include "serial.h"
 #include "rl78.h"
 #include <unistd.h>
-#include <termios.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -215,26 +214,26 @@ int rl78_cmd_reset(int fd)
 int rl78_cmd_baud_rate_set(int fd, int baud, float voltage)
 {
     unsigned char buf[2];
-    int new_baud;
+    int baud_code;
     switch (baud)
     {
     default:
         fprintf(stderr, "Unsupported baudrate %ubps. Using default baudrate 115200bps.\n", baud);
         baud = 115200;
     case 115200:
-        new_baud = BAUD_115200;
+        baud_code = BAUD_115200;
         break;
     case 250000:
-        new_baud = BAUD_250000;
+        baud_code = BAUD_250000;
         break;
     case 500000:
-        new_baud = BAUD_500000;
+        baud_code = BAUD_500000;
         break;
     case 1000000:
-        new_baud = BAUD_1000000;
+        baud_code = BAUD_1000000;
         break;
     }
-    buf[0] = new_baud;
+    buf[0] = baud_code;
     buf[1] = (int)(voltage * 10);
     if (3 <= verbose_level)
     {
@@ -260,7 +259,12 @@ int rl78_cmd_baud_rate_set(int fd, int baud, float voltage)
         printf("\tFrequency: %u MHz\n", data[1]);
         printf("\tMode: %s\n", 0 == data[2] ? "full-speed mode" : "wide-voltage mode");
     }
-    return serial_set_baud(fd, new_baud);
+    /* If no need to change baudrate, just exit */
+    if (115200 == baud)
+    {
+        return 0;
+    }
+    return serial_set_baud(fd, baud);
 }
 
 int rl78_cmd_silicon_signature(int fd, char device_name[11], unsigned int *code_size, unsigned int *data_size)
