@@ -75,7 +75,6 @@ void terminal_start(int fd, int baud, int mode)
 
     serial_set_baud(fd, baud);
     pthread_create(&receiver, NULL, receiver_func, &fd);
-    serial_flush(fd);
     rl78_reset(fd, mode);
     for (;;)
     {

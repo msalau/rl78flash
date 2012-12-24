@@ -27,8 +27,6 @@ int serial_set_rts(int fd, int level);
 int serial_set_txd(int fd, int level);
 int serial_write(int fd, const void *buf, int len);
 int serial_read(int fd, void *buf, int len);
-int serial_sync(int fd);
-int serial_flush(int fd);
 int serial_close(int fd);
 
 #endif  // SERIAL_H__

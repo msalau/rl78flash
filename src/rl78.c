@@ -71,7 +71,6 @@ int rl78_reset_init(int fd, int baud, int mode, float voltage)
     {
         serial_read(fd, &r, 1);
     }
-    serial_sync(fd);
     usleep(1000);
     return rl78_cmd_baud_rate_set(fd, baud, voltage);
 }
@@ -154,12 +153,10 @@ int rl78_recv(int fd, void *data, int *len, int explen)
     if ((MAX_RESPONSE_LENGTH - 2) <= data_len
         || STX != in[0])
     {
-        serial_flush(fd);
         return RESPONSE_FORMAT_ERROR;
     }
     if (explen != data_len)
     {
-        serial_flush(fd);
         return RESPONSE_EXPECTED_LENGTH_ERROR;
     }
     // receive data field, checksum and footer byte

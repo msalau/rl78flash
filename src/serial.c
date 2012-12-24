@@ -60,12 +60,6 @@ int serial_open(const char *port)
     return fd;
 }
 
-int serial_flush(int fd)
-{
-    serial_sync(fd);
-    return ioctl(fd, TCFLSH, TCIFLUSH);
-}
-
 typedef struct {
     int baudrate;
     int code;
@@ -217,11 +211,6 @@ int serial_read(int fd, void *buf, int len)
         printf("\n");
     }
     return nbytes;
-}
-
-int serial_sync(int fd)
-{
-    return fsync(fd);
 }
 
 int serial_close(int fd)
