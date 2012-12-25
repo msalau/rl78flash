@@ -21,6 +21,6 @@
 #define TERMINAL_H__
 
 #include "serial.h"
-void terminal_start(port_handle_t fd, int baud, int mode);
+void terminal_start(port_handle_t fd, int baud, int mode, int reset);
 
 #endif  /* TERMINAL_H__ */

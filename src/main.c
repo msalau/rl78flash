@@ -280,7 +280,9 @@ int main(int argc, char *argv[])
             {
                 printf("Start terminal\n");
             }
-            terminal_start(fd, terminal_baud, mode);
+            int reset_before_terminal = write || verify || erase
+                || reset_after || display_info;
+            terminal_start(fd, terminal_baud, mode, reset_before_terminal);
         }
         else if (1 == reset_after)
         {

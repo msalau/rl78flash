@@ -53,7 +53,7 @@ static void * receiver_func(void * pfd)
     return NULL;
 }
 
-void terminal_start(port_handle_t fd, int baud, int mode)
+void terminal_start(port_handle_t fd, int baud, int mode, int reset)
 {
     pthread_t receiver;
     char c = 0;
@@ -75,7 +75,10 @@ void terminal_start(port_handle_t fd, int baud, int mode)
 
     serial_set_baud(fd, baud);
     pthread_create(&receiver, NULL, receiver_func, &fd);
-    rl78_reset(fd, mode);
+    if (reset)
+    {
+        rl78_reset(fd, mode);
+    }
     for (;;)
     {
         if (1 == read(STDIN_FILENO, &c, 1))

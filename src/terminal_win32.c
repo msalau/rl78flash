@@ -57,7 +57,7 @@ static DWORD WINAPI receiver_func(LPVOID pfd)
     return 0;
 }
 
-void terminal_start(port_handle_t fd, int baud, int mode)
+void terminal_start(port_handle_t fd, int baud, int mode, int reset)
 {
     HANDLE    receiver;
     char c = 0;
@@ -89,7 +89,10 @@ void terminal_start(port_handle_t fd, int baud, int mode)
                             0,
                             NULL);
 
-    rl78_reset(fd, mode);
+    if (reset)
+    {
+        rl78_reset(fd, mode);
+    }
     for (;;)
     {
         if (1 == read(STDIN_FILENO, &c, 1))

@@ -40,11 +40,11 @@ by it's full path (e.g. /dev/ttyUSB0).
 Program flow
 ------------
 
-Erase -> Write -> Verify -> Reset -> Terminal
+Info -> Erase -> Write -> Verify -> Reset -> Terminal
 
-If terminal is enabled, reset is issued regardless of 'Reset MCU' option. Upon
-termination of terminal, MCU is left running without restarting firmware regardless
-of 'Reset MCU' option.
+Reset is generated if:
+* terminal is disabled and '-r' argument is passed
+* terminal is enabled and any other action is enabled
 
 Typical invocation
 ------------------
