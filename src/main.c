@@ -163,9 +163,9 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    int fd = serial_open(portname);
+    port_handle_t fd = serial_open(portname);
     int rc = 0;
-    if (-1 == fd)
+    if (INVALID_HANDLE_VALUE == fd)
     {
         return -1;
     }

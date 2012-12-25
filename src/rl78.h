@@ -48,10 +48,10 @@
 #define ETB 0x17
 #define ETX 0x03
 
-#define BAUD_115200     0x00
-#define BAUD_250000     0x01
-#define BAUD_500000     0x02
-#define BAUD_1000000    0x03
+#define RL78_BAUD_115200     0x00
+#define RL78_BAUD_250000     0x01
+#define RL78_BAUD_500000     0x02
+#define RL78_BAUD_1000000    0x03
 
 #define FLASH_BLOCK_SIZE        1024
 #define CODE_OFFSET             (0U)
@@ -79,22 +79,24 @@
 #define MODE_MAX_VALUE (MODE_UART | MODE_RESET)
 #define MODE_MIN_VALUE 0
 
-int rl78_reset_init(int fd, int baud, int mode, float voltage);
-int rl78_reset(int fd, int mode);
-int rl78_send_cmd(int fd, int cmd, const void *data, int len);
-int rl78_send_data(int fd, const void *data, int len, int last);
-int rl78_recv(int fd, void *data, int *len, int explen);
-int rl78_cmd_reset(int fd);
-int rl78_cmd_baud_rate_set(int fd, int baud, float voltage);
-int rl78_cmd_silicon_signature(int fd, char device_name[11], unsigned int *code_size, unsigned int *data_size);
-int rl78_cmd_block_erase(int fd, unsigned int address);
-int rl78_cmd_block_blank_check(int fd, unsigned int address_start, unsigned int address_end);
-int rl78_cmd_checksum(int fd, unsigned int address_start, unsigned int address_end);
-int rl78_cmd_programming(int fd, unsigned int address_start, unsigned int address_end, const void *rom);
+#include "serial.h"
+
+int rl78_reset_init(port_handle_t fd, int baud, int mode, float voltage);
+int rl78_reset(port_handle_t fd, int mode);
+int rl78_send_cmd(port_handle_t fd, int cmd, const void *data, int len);
+int rl78_send_data(port_handle_t fd, const void *data, int len, int last);
+int rl78_recv(port_handle_t fd, void *data, int *len, int explen);
+int rl78_cmd_reset(port_handle_t fd);
+int rl78_cmd_baud_rate_set(port_handle_t fd, int baud, float voltage);
+int rl78_cmd_silicon_signature(port_handle_t fd, char device_name[11], unsigned int *code_size, unsigned int *data_size);
+int rl78_cmd_block_erase(port_handle_t fd, unsigned int address);
+int rl78_cmd_block_blank_check(port_handle_t fd, unsigned int address_start, unsigned int address_end);
+int rl78_cmd_checksum(port_handle_t fd, unsigned int address_start, unsigned int address_end);
+int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom);
 unsigned int rl78_checksum(const void *rom, unsigned int len);
-int rl78_cmd_verify(int fd, unsigned int address_start, unsigned int address_end, const void *rom);
-int rl78_program(int fd, void *code, unsigned int code_size, void *data, unsigned int data_size);
-int rl78_erase(int fd, unsigned int code_size, unsigned int data_size);
-int rl78_verify(int fd, void *code, unsigned int code_size, void *data, unsigned int data_size);
+int rl78_cmd_verify(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom);
+int rl78_program(port_handle_t fd, void *code, unsigned int code_size, void *data, unsigned int data_size);
+int rl78_erase(port_handle_t fd, unsigned int code_size, unsigned int data_size);
+int rl78_verify(port_handle_t fd, void *code, unsigned int code_size, void *data, unsigned int data_size);
 
 #endif  // RL78_H__

@@ -20,13 +20,25 @@
 #ifndef SERIAL_H__
 #define SERIAL_H__
 
-int serial_open(const char *port);
-int serial_set_baud(int fd, int baud);
-int serial_set_dtr(int fd, int level);
-int serial_set_rts(int fd, int level);
-int serial_set_txd(int fd, int level);
-int serial_write(int fd, const void *buf, int len);
-int serial_read(int fd, void *buf, int len);
-int serial_close(int fd);
+#if WIN32 != 1
+
+typedef int port_handle_t;
+#define INVALID_HANDLE_VALUE (-1)
+
+#else
+
+#include <windows.h>
+typedef HANDLE port_handle_t;
+
+#endif
+
+port_handle_t serial_open(const char *port);
+int serial_set_baud(port_handle_t fd, int baud);
+int serial_set_dtr(port_handle_t fd, int level);
+int serial_set_rts(port_handle_t fd, int level);
+int serial_set_txd(port_handle_t fd, int level);
+int serial_write(port_handle_t fd, const void *buf, int len);
+int serial_read(port_handle_t fd, void *buf, int len);
+int serial_close(port_handle_t fd);
 
 #endif  // SERIAL_H__

@@ -26,7 +26,7 @@
 extern int verbose_level;
 static unsigned char communication_mode;
 
-static void rl78_set_reset(int fd, int mode, int value)
+static void rl78_set_reset(port_handle_t fd, int mode, int value)
 {
     if (MODE_RESET_RTS == (mode & MODE_RESET))
     {
@@ -38,7 +38,7 @@ static void rl78_set_reset(int fd, int mode, int value)
     }
 }
 
-int rl78_reset_init(int fd, int baud, int mode, float voltage)
+int rl78_reset_init(port_handle_t fd, int baud, int mode, float voltage)
 {
     unsigned char r;
     if (MODE_UART_1 == (mode & MODE_UART))
@@ -75,7 +75,7 @@ int rl78_reset_init(int fd, int baud, int mode, float voltage)
     return rl78_cmd_baud_rate_set(fd, baud, voltage);
 }
 
-int rl78_reset(int fd, int mode)
+int rl78_reset(port_handle_t fd, int mode)
 {
     serial_set_txd(fd, 1);                                  /* TOOL0 -> 1 */
     rl78_set_reset(fd, mode, 0);                            /* RESET -> 0 */
@@ -96,7 +96,7 @@ int checksum(const void *data, int len)
     return sum & 0x00FF;
 }
 
-int rl78_send_cmd(int fd, int cmd, const void *data, int len)
+int rl78_send_cmd(port_handle_t fd, int cmd, const void *data, int len)
 {
     if (255 < len)
     {
@@ -118,7 +118,7 @@ int rl78_send_cmd(int fd, int cmd, const void *data, int len)
     return ret;
 }
 
-int rl78_send_data(int fd, const void *data, int len, int last)
+int rl78_send_data(port_handle_t fd, const void *data, int len, int last)
 {
     if (256 < len)
     {
@@ -139,7 +139,7 @@ int rl78_send_data(int fd, const void *data, int len, int last)
     return ret;
 }
 
-int rl78_recv(int fd, void *data, int *len, int explen)
+int rl78_recv(port_handle_t fd, void *data, int *len, int explen)
 {
     unsigned char in[MAX_RESPONSE_LENGTH];
     int data_len;
@@ -178,7 +178,7 @@ int rl78_recv(int fd, void *data, int *len, int explen)
     return RESPONSE_OK;
 }
 
-int rl78_cmd_reset(int fd)
+int rl78_cmd_reset(port_handle_t fd)
 {
     if (3 <= verbose_level)
     {
@@ -208,7 +208,7 @@ int rl78_cmd_reset(int fd)
     return 0;
 }
 
-int rl78_cmd_baud_rate_set(int fd, int baud, float voltage)
+int rl78_cmd_baud_rate_set(port_handle_t fd, int baud, float voltage)
 {
     unsigned char buf[2];
     int baud_code;
@@ -218,16 +218,16 @@ int rl78_cmd_baud_rate_set(int fd, int baud, float voltage)
         fprintf(stderr, "Unsupported baudrate %ubps. Using default baudrate 115200bps.\n", baud);
         baud = 115200;
     case 115200:
-        baud_code = BAUD_115200;
+        baud_code = RL78_BAUD_115200;
         break;
     case 250000:
-        baud_code = BAUD_250000;
+        baud_code = RL78_BAUD_250000;
         break;
     case 500000:
-        baud_code = BAUD_500000;
+        baud_code = RL78_BAUD_500000;
         break;
     case 1000000:
-        baud_code = BAUD_1000000;
+        baud_code = RL78_BAUD_1000000;
         break;
     }
     buf[0] = baud_code;
@@ -264,7 +264,7 @@ int rl78_cmd_baud_rate_set(int fd, int baud, float voltage)
     return serial_set_baud(fd, baud);
 }
 
-int rl78_cmd_silicon_signature(int fd, char device_name[11], unsigned int *code_size, unsigned int *data_size)
+int rl78_cmd_silicon_signature(port_handle_t fd, char device_name[11], unsigned int *code_size, unsigned int *data_size)
 {
     if (3 <= verbose_level)
     {
@@ -322,7 +322,7 @@ int rl78_cmd_silicon_signature(int fd, char device_name[11], unsigned int *code_
     return 0;
 }
 
-int rl78_cmd_block_erase(int fd, unsigned int address)
+int rl78_cmd_block_erase(port_handle_t fd, unsigned int address)
 {
     if (3 <= verbose_level)
     {
@@ -349,7 +349,7 @@ int rl78_cmd_block_erase(int fd, unsigned int address)
     return 0;
 }
 
-int rl78_cmd_block_blank_check(int fd, unsigned int address_start, unsigned int address_end)
+int rl78_cmd_block_blank_check(port_handle_t fd, unsigned int address_start, unsigned int address_end)
 {
     if (3 <= verbose_level)
     {
@@ -398,7 +398,7 @@ int rl78_cmd_block_blank_check(int fd, unsigned int address_start, unsigned int 
     return rc;
 }
 
-int rl78_cmd_checksum(int fd, unsigned int address_start, unsigned int address_end)
+int rl78_cmd_checksum(port_handle_t fd, unsigned int address_start, unsigned int address_end)
 {
     if (3 <= verbose_level)
     {
@@ -430,7 +430,7 @@ int rl78_cmd_checksum(int fd, unsigned int address_start, unsigned int address_e
     return rc;
 }
 
-int rl78_cmd_programming(int fd, unsigned int address_start, unsigned int address_end, const void *rom)
+int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom)
 {
     if (3 <= verbose_level)
     {
@@ -529,7 +529,7 @@ unsigned int rl78_checksum(const void *rom, unsigned int len)
     return sum & 0x0000FFFFU;
 }
 
-int rl78_cmd_verify(int fd, unsigned int address_start, unsigned int address_end, const void *rom)
+int rl78_cmd_verify(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom)
 {
     if (3 <= verbose_level)
     {
@@ -618,7 +618,7 @@ int allFFs(const void *mem, unsigned int size)
     return 1;
 }
 
-int rl78_program(int fd, void *code, unsigned int code_size, void *data, unsigned int data_size)
+int rl78_program(port_handle_t fd, void *code, unsigned int code_size, void *data, unsigned int data_size)
 {
     // Suppress  "unused variable" warnings
     (void)data;
@@ -687,7 +687,7 @@ int rl78_program(int fd, void *code, unsigned int code_size, void *data, unsigne
     return rc;
 }
 
-int rl78_erase(int fd, unsigned int code_size, unsigned int data_size)
+int rl78_erase(port_handle_t fd, unsigned int code_size, unsigned int data_size)
 {
     // Suppress  "unused variable" warnings
     (void)data_size;
@@ -740,7 +740,7 @@ int rl78_erase(int fd, unsigned int code_size, unsigned int data_size)
     return rc;
 }
 
-int rl78_verify(int fd, void *code, unsigned int code_size, void *data, unsigned int data_size)
+int rl78_verify(port_handle_t fd, void *code, unsigned int code_size, void *data, unsigned int data_size)
 {
     // Suppress  "unused variable" warnings
     (void)data;

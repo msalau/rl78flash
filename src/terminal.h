@@ -20,6 +20,7 @@
 #ifndef TERMINAL_H__
 #define TERMINAL_H__
 
-void terminal_start(int fd, int baud, int mode);
+#include "serial.h"
+void terminal_start(port_handle_t fd, int baud, int mode);
 
 #endif  /* TERMINAL_H__ */

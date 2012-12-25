@@ -79,7 +79,7 @@ const baudrate_code_t baudrates[] =
     { 0, 0}
 };
 
-int serial_set_baud(int fd, int baud)
+int serial_set_baud(port_handle_t fd, int baud)
 {
     const baudrate_code_t *pbaud = baudrates;
     while (0 != pbaud->baudrate)
@@ -102,7 +102,7 @@ int serial_set_baud(int fd, int baud)
     return tcsetattr(fd, TCSANOW, &options);
 }
 
-int serial_set_dtr(int fd, int level)
+int serial_set_dtr(port_handle_t fd, int level)
 {
     int command;
     const int dtr = TIOCM_DTR;
@@ -117,7 +117,7 @@ int serial_set_dtr(int fd, int level)
     return ioctl(fd, command, &dtr);
 }
 
-int serial_set_rts(int fd, int level)
+int serial_set_rts(port_handle_t fd, int level)
 {
     int command;
     const int rts = TIOCM_RTS;
@@ -132,7 +132,7 @@ int serial_set_rts(int fd, int level)
     return ioctl(fd, command, &rts);
 }
 
-int serial_set_txd(int fd, int level)
+int serial_set_txd(port_handle_t fd, int level)
 {
     int command;
     if (level)
@@ -146,7 +146,7 @@ int serial_set_txd(int fd, int level)
     return ioctl(fd, command);
 }
 
-int serial_write(int fd, const void *buf, int len)
+int serial_write(port_handle_t fd, const void *buf, int len)
 {
     if (4 <= verbose_level)
     {
@@ -177,7 +177,7 @@ int serial_write(int fd, const void *buf, int len)
     return len - bytes_left;
 }
 
-int serial_read(int fd, void *buf, int len)
+int serial_read(port_handle_t fd, void *buf, int len)
 {
     int bytes_left = len;
     int rc = 0;
@@ -213,7 +213,7 @@ int serial_read(int fd, void *buf, int len)
     return nbytes;
 }
 
-int serial_close(int fd)
+int serial_close(port_handle_t fd)
 {
     if (4 <= verbose_level)
     {

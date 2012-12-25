@@ -34,7 +34,7 @@ static void * receiver_func(void * pfd)
 {
     char c;
     char prev = '\n';
-    int fd = *(int*)pfd;
+    port_handle_t fd = *(port_handle_t*)pfd;
     for(;;)
     {
         if (1 == serial_read(fd, &c, 1))
@@ -53,7 +53,7 @@ static void * receiver_func(void * pfd)
     return NULL;
 }
 
-void terminal_start(int fd, int baud, int mode)
+void terminal_start(port_handle_t fd, int baud, int mode)
 {
     pthread_t receiver;
     char c = 0;
