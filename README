@@ -34,6 +34,9 @@ rl78s [options] <port> [<file>]
         -t baud Start terminal with specified baudrate
         -h      Display help
 
+In case of Windows, port is specified by it's name (e.g. COM14), in case of Linux --
+by it's full path (e.g. /dev/ttyUSB0).
+
 Program flow
 ------------
 

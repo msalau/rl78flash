@@ -1,7 +1,15 @@
 CFLAGS = -O2 -Wall -Wextra
-LDFLAGS += -lpthread
+LDFLAGS = -s
+LIBS = -lpthread
 
-rl78flash: src/rl78.o src/serial.o src/main.o src/srec.o src/terminal.o
+OBJS = src/rl78.o src/main.o src/srec.o
+OBJS_LINUX = src/terminal.o src/serial.o
+OBJS_WIN32 = src/terminal_win32.o src/serial_win32.o
+
+rl78flash: $(OBJS) $(OBJS_LINUX)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+rl78flash.exe: $(OBJS) $(OBJS_WIN32)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 clean:
@@ -9,3 +17,6 @@ clean:
 
 cygwin:
 	make CC=i686-pc-cygwin-gcc
+
+win32:
+	make CC=i686-pc-mingw32-gcc rl78flash.exe
