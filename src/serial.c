@@ -146,6 +146,11 @@ int serial_set_txd(port_handle_t fd, int level)
     return ioctl(fd, command);
 }
 
+int serial_flush(port_handle_t fd)
+{
+    return tcflush(fd, TCIOFLUSH);
+}
+
 int serial_write(port_handle_t fd, const void *buf, int len)
 {
     if (4 <= verbose_level)

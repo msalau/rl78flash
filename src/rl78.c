@@ -57,6 +57,7 @@ int rl78_reset_init(port_handle_t fd, int baud, int mode, float voltage)
     }
     rl78_set_reset(fd, mode, 0);                            /* RESET -> 0 */
     serial_set_txd(fd, 0);                                  /* TOOL0 -> 0 */
+    serial_flush(fd);
     usleep(1000);
     rl78_set_reset(fd, mode, 1);                            /* RESET -> 1 */
     usleep(10);

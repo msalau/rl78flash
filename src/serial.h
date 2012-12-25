@@ -37,6 +37,7 @@ int serial_set_baud(port_handle_t fd, int baud);
 int serial_set_dtr(port_handle_t fd, int level);
 int serial_set_rts(port_handle_t fd, int level);
 int serial_set_txd(port_handle_t fd, int level);
+int serial_flush(port_handle_t fd);
 int serial_write(port_handle_t fd, const void *buf, int len);
 int serial_read(port_handle_t fd, void *buf, int len);
 int serial_close(port_handle_t fd);
