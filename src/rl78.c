@@ -63,6 +63,7 @@ int rl78_reset_init(port_handle_t fd, int baud, int mode, float voltage)
     usleep(10);
     serial_set_txd(fd, 1);                                  /* TOOL0 -> 1 */
     usleep(1000);
+    serial_flush(fd);
     if (3 <= verbose_level)
     {
         printf("Send 1-byte data for setting mode\n");
