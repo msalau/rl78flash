@@ -9,6 +9,14 @@ RTS or DTR pin. DTR is used by default.
 
 Thanks to Hiroaki Okoshi for proposal.
 
+Download
+========
+
+Binary version for Windows can be downloader from
+https://github.com/msalov/rl78flash/releases
+
+Linux users are encouraged to build rl78flash by himself.
+
 Usage
 =====
 
