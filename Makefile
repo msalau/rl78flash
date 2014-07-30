@@ -20,3 +20,7 @@ cygwin:
 
 win32:
 	make CC=i686-pc-mingw32-gcc rl78flash.exe
+
+install: rl78flash
+	mkdir -p $(DESTDIR)/usr/bin
+	install -m 755 -t $(DESTDIR)/usr/bin $<
