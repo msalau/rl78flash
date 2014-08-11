@@ -128,7 +128,11 @@ int serial_set_txd(port_handle_t fd, int level)
 
 int serial_flush(port_handle_t fd)
 {
-    return FlushFileBuffers(fd) != 0 ? 0 : -1;
+    if (4 <= verbose_level)
+    {
+        printf("\t\tFlush IO buffers\n");
+    }
+    return PurgeComm(fd, PURGE_RXCLEAR | PURGE_TXCLEAR) != 0 ? 0 : -1;
 }
 
 int serial_write(port_handle_t fd, const void *buf, int len)
