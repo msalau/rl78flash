@@ -302,7 +302,7 @@ int rl78_cmd_silicon_signature(port_handle_t fd, char device_name[11], unsigned 
     memcpy(&rom_code_address, data + 13, 3);
     memcpy(&rom_data_address, data + 16, 3);
     const unsigned int rom_code_size = (rom_code_address + 1);
-    const unsigned int rom_data_size = (rom_data_address - 0x000F1000U + 1);
+    const unsigned int rom_data_size = (rom_data_address != 0) ? (rom_data_address - 0x000F1000U + 1) : 0;
 
     if (NULL != code_size)
     {
@@ -318,7 +318,14 @@ int rl78_cmd_silicon_signature(port_handle_t fd, char device_name[11], unsigned 
         printf("\tDevice code: %02X%02X%02X\n", data[0], data[1], data[2]);
         printf("\tDevice name: %s\n", device_name);
         printf("\tCode flash size: %ukB\n", rom_code_size / 1024);
-        printf("\tData flash size: %ukB\n", rom_data_size / 1024);
+        if (rom_data_size != 0)
+        {
+            printf("\tData flash size: %ukB\n", rom_data_size / 1024);
+        }
+        else
+        {
+            printf("\tData flash not present\n");
+        }
         printf("\tFirmware version: %X.%X%X\n", data[19], data[20], data[21]);
     }
     return 0;
