@@ -2,7 +2,7 @@ CFLAGS = -O2 -Wall -Wextra
 LDFLAGS = -s
 LIBS = -lpthread
 
-OBJS = src/rl78.o src/main.o src/srec.o
+OBJS = src/rl78.o src/main.o src/srec.o src/wait_kbhit.o
 OBJS_LINUX = src/terminal.o src/serial.o
 OBJS_WIN32 = src/terminal_win32.o src/serial_win32.o
 

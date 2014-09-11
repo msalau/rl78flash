@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012 Maxim Salov                                                                                    *
+ * Copyright (c) 2012-2014 Maxim Salov                                                                               *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -37,6 +37,7 @@ const char *usage =
     "\t-w\tWrite memory\n"
     "\t-c\tVerify memory\n"
     "\t-r\tReset MCU (switch to RUN mode)\n"
+    "\t-d\tDelay bootloader initialization till keypress\n"
     "\t-b baud\tSet baudrate (supported baudrates: 115200, 250000, 500000, 1000000)\n"
     "\t\t\tdefault: 115200\n"
     "\t-m n\tSet communication mode\n"
@@ -56,6 +57,7 @@ int main(int argc, char *argv[])
     char verify = 0;
     char write = 0;
     char reset_after = 0;
+    char wait = 0;
     char display_info = 0;
     char mode = 0;
     int baud = 115200;
@@ -65,7 +67,7 @@ int main(int argc, char *argv[])
 
     char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "ab:cvwreim:p:t:h?")) != -1)
+    while ((opt = getopt(argc, argv, "ab:cvwrdeim:p:t:h?")) != -1)
     {
         switch (opt)
         {
@@ -131,6 +133,9 @@ int main(int argc, char *argv[])
         case 'r':
             reset_after = 1;
             break;
+	case 'd':
+	    wait = 1;
+	    break;
         case 'i':
             display_info = 1;
             break;
@@ -188,7 +193,7 @@ int main(int argc, char *argv[])
             || 1 == verify
             || 1 == display_info)
         {
-            rc = rl78_reset_init(fd, baud, mode, voltage);
+            rc = rl78_reset_init(fd, wait, baud, mode, voltage);
             if (0 > rc)
             {
                 fprintf(stderr, "Initialization failed\n");

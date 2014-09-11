@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012 Maxim Salov                                                                                    *
+ * Copyright (c) 2012-2014 Maxim Salov                                                                               *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -81,7 +81,7 @@
 
 #include "serial.h"
 
-int rl78_reset_init(port_handle_t fd, int baud, int mode, float voltage);
+int rl78_reset_init(port_handle_t fd, int wait, int baud, int mode, float voltage);
 int rl78_reset(port_handle_t fd, int mode);
 int rl78_send_cmd(port_handle_t fd, int cmd, const void *data, int len);
 int rl78_send_data(port_handle_t fd, const void *data, int len, int last);

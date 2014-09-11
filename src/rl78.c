@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012 Maxim Salov                                                                                    *
+ * Copyright (c) 2012-2014 Maxim Salov                                                                               *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include "wait_kbhit.h"
 
 extern int verbose_level;
 static unsigned char communication_mode;
@@ -38,7 +39,7 @@ static void rl78_set_reset(port_handle_t fd, int mode, int value)
     }
 }
 
-int rl78_reset_init(port_handle_t fd, int baud, int mode, float voltage)
+int rl78_reset_init(port_handle_t fd, int wait, int baud, int mode, float voltage)
 {
     unsigned char r;
     if (MODE_UART_1 == (mode & MODE_UART))
@@ -57,6 +58,12 @@ int rl78_reset_init(port_handle_t fd, int baud, int mode, float voltage)
     }
     rl78_set_reset(fd, mode, 0);                            /* RESET -> 0 */
     serial_set_txd(fd, 0);                                  /* TOOL0 -> 0 */
+    if (wait)
+    {
+        printf("Turn MCU's power on and press any key...");
+        wait_kbhit();
+        printf("\n");
+    }
     serial_flush(fd);
     usleep(1000);
     rl78_set_reset(fd, mode, 1);                            /* RESET -> 1 */
