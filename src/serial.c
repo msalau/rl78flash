@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012 Maxim Salov                                                                                    *
+ * Copyright (c) 2012-2014 Maxim Salov                                                                               *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -99,6 +99,22 @@ int serial_set_baud(port_handle_t fd, int baud)
     tcgetattr(fd, &options);
     cfsetispeed(&options, pbaud->code);
     cfsetospeed(&options, pbaud->code);
+    return tcsetattr(fd, TCSANOW, &options);
+}
+
+int serial_set_parity(port_handle_t fd, int enable, int odd_parity)
+{
+    struct termios options;
+    tcgetattr(fd, &options);
+    options.c_cflag &= ~(PARENB | PARODD);
+    if (enable)
+    {
+        options.c_cflag |= PARENB;
+        if (odd_parity)
+        {
+            options.c_cflag |= PARODD;
+        }
+    }
     return tcsetattr(fd, TCSANOW, &options);
 }
 
