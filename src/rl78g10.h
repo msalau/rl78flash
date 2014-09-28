@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012-2014 Maksim Salau                                                                               *
+ * Copyright (c) 2014 Maksim Salau                                                                                    *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -17,35 +17,40 @@
  * IN THE SOFTWARE.                                                                                                  *
  *********************************************************************************************************************/
 
-#ifndef SERIAL_H__
-#define SERIAL_H__
+#ifndef RL78G10_H__
+#define RL78G10_H__
 
-#if WIN32 != 1
 
-typedef int port_handle_t;
-#define INVALID_HANDLE_VALUE (-1)
+#define CMD_MODE_SET            0x3A
+#define CMD_ERASE_WRITE         0x60
+#define CMD_CRC_CHECK           0x53
 
-#else
+#define STATUS_COMMAND_NUMBER_ERROR     0x04
+#define STATUS_ACK                      0x06
+#define STATUS_NACK                     0x15
+#define STATUS_ERASE_ERROR              0x1A
+#define STATUS_IVERIFY_BLANK_ERROR      0x1B
+#define STATUS_WRITE_ERROR              0x1C
 
-#include <windows.h>
-typedef HANDLE port_handle_t;
+#define FLASH_BLOCK_SIZE        4
+#define CODE_OFFSET             (0U)
 
-#endif
+#define MAX_RESPONSE_LENGTH 32
 
-#define DISABLE 0
-#define ENABLE  1
-#define EVEN    0
-#define ODD     1
+#define RESPONSE_OK                     (0)
+#define RESPONSE_CHECKSUM_ERROR         (-1)
+#define RESPONSE_FORMAT_ERROR           (-2)
+#define RESPONSE_EXPECTED_LENGTH_ERROR  (-3)
 
-port_handle_t serial_open(const char *port);
-int serial_set_baud(port_handle_t fd, int baud);
-int serial_set_parity(port_handle_t fd, int enable, int odd_parity);
-int serial_set_dtr(port_handle_t fd, int level);
-int serial_set_rts(port_handle_t fd, int level);
-int serial_set_txd(port_handle_t fd, int level);
-int serial_flush(port_handle_t fd);
-int serial_write(port_handle_t fd, const void *buf, int len);
-int serial_read(port_handle_t fd, void *buf, int len);
-int serial_close(port_handle_t fd);
+#define MODE_RESET_DTR 0
+#define MODE_RESET_RTS 1
+#define MODE_MAX_VALUE MODE_RESET_RTS
 
-#endif  // SERIAL_H__
+#include "serial.h"
+
+int rl78_reset(port_handle_t fd, int mode);
+int rl78g10_reset_init(port_handle_t fd, int mode);
+int rl78g10_erase_write(port_handle_t fd, const void *data, int size);
+int rl78g10_crc_check(port_handle_t fd, const void *data, int size);
+
+#endif  // RL78G10_H__

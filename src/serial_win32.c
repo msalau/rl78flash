@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012 Maxim Salov                                                                                    *
+ * Copyright (c) 2012-2014 Maksim Salau                                                                               *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -81,6 +81,25 @@ int serial_set_baud(port_handle_t fd, int baud)
     DCB dcbSerialParams;
     GetCommState(fd, &dcbSerialParams);
     dcbSerialParams.BaudRate = baud;
+    return SetCommState(fd, &dcbSerialParams) != 0 ? 0 : -1;
+}
+
+int serial_set_parity(port_handle_t fd, int enable, int odd_parity)
+{
+    DCB dcbSerialParams;
+    GetCommState(fd, &dcbSerialParams);
+    dcbSerialParams.Parity = NOPARITY;
+    if (enable)
+    {
+        if (odd_parity)
+        {
+            dcbSerialParams.Parity = ODDPARITY;
+        }
+        else
+        {
+            dcbSerialParams.Parity = EVENPARITY;
+        }
+    }
     return SetCommState(fd, &dcbSerialParams) != 0 ? 0 : -1;
 }
 
