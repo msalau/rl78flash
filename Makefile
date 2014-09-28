@@ -3,7 +3,7 @@ LDFLAGS = -s
 LIBS = -lpthread
 
 OBJS = src/rl78.o src/main.o src/srec.o src/wait_kbhit.o
-OBJS_G10 = src/rl78g10.o src/main_g10.o src/srec.o src/crc16_ccit.o
+OBJS_G10 = src/rl78g10.o src/main_g10.o src/srec.o src/crc16_ccit.o src/wait_kbhit.o
 OBJS_LINUX = src/terminal.o src/serial.o
 OBJS_WIN32 = src/terminal_win32.o src/serial_win32.o
 

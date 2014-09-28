@@ -49,7 +49,7 @@
 #include "serial.h"
 
 int rl78_reset(port_handle_t fd, int mode);
-int rl78g10_reset_init(port_handle_t fd, int mode);
+int rl78g10_reset_init(port_handle_t fd, int wait, int mode);
 int rl78g10_erase_write(port_handle_t fd, const void *data, int size);
 int rl78g10_crc_check(port_handle_t fd, const void *data, int size);
 

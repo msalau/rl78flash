@@ -34,6 +34,7 @@ const char *usage =
     "\t-w\tWrite memory\n"
     "\t-c\tVerify memory (CRC check)\n"
     "\t-r\tReset MCU (switch to RUN mode)\n"
+    "\t-d\tDelay bootloader initialization till keypress\n"
     "\t-m n\tSet communication mode\n"
     "\t\t\tn=1 Single-wire UART, Reset by DTR\n"
     "\t\t\tn=2 Single-wire UART, Reset by RTS\n"
@@ -47,13 +48,14 @@ int main(int argc, char *argv[])
     char verify = 0;
     char write = 0;
     char reset_after = 0;
+    char wait = 0;
     char mode = 0;
     char terminal = 0;
     int terminal_baud = 0;
 
     char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "acvwrm:t:h?")) != -1)
+    while ((opt = getopt(argc, argv, "acvwrdm:t:h?")) != -1)
     {
         switch (opt)
         {
@@ -91,6 +93,9 @@ int main(int argc, char *argv[])
             break;
         case 'r':
             reset_after = 1;
+            break;
+        case 'd':
+            wait = 1;
             break;
         case 'h':
         case '?':
@@ -174,7 +179,7 @@ int main(int argc, char *argv[])
     {
         if (1 == write || 1 == verify)
         {
-            rc = rl78g10_reset_init(fd, mode);
+            rc = rl78g10_reset_init(fd, wait, mode);
             if (0 > rc)
             {
                 fprintf(stderr, "Initialization failed\n");

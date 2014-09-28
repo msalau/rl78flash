@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include "wait_kbhit.h"
 
 extern int verbose_level;
 
@@ -56,11 +57,17 @@ static void rl78g10_set_reset(port_handle_t fd, int mode, int value)
     }
 }
 
-int rl78g10_reset_init(port_handle_t fd, int mode)
+int rl78g10_reset_init(port_handle_t fd, int wait, int mode)
 {
     unsigned char buf[2];
     rl78g10_set_reset(fd, mode, 0);                         /* RESET -> 0 */
     serial_set_txd(fd, 0);                                  /* TOOL0 -> 0 */
+    if (wait)
+    {
+        printf("Turn MCU's power on and press any key...");
+        wait_kbhit();
+        printf("\n");
+    }
     serial_flush(fd);
     usleep(1000);
     rl78g10_set_reset(fd, mode, 1);                         /* RESET -> 1 */
