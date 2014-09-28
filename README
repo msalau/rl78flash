@@ -11,6 +11,7 @@ Thanks to
 =========
 
 Hiroaki Okoshi
+Zurab aka kuber from electronix.ru
 
 Download
 ========
@@ -30,6 +31,24 @@ See also output from
 $ rl78flash -h
 and
 $ rl78g10flash -h
+
+Rewrite MCU with RESET pin acting as GPIO
+-----------------------------------------
+
+If RESET pin of MCU is acting as GPIO it is no longer possible to enter
+bootloader mode without additional user actions. To enter bootloader
+mode it nessesary to power up MCU with RESET pin tied to ground.
+
+Procedute to rewrite such microcontrollers:
+1. power down MCU
+2. start rl78flash tool with -d argument
+  $ rl78flash -diva /dev/ttyUSB0 firmware.mot
+3. wait till message "Turn MCU's power on and press any key..."
+4. power up MCU
+5. press any key
+6. that's all.
+
+This procedure is valid for rl78g10flash too.
 
 License
 =======
