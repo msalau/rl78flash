@@ -133,9 +133,9 @@ int main(int argc, char *argv[])
         case 'r':
             reset_after = 1;
             break;
-	case 'd':
-	    wait = 1;
-	    break;
+        case 'd':
+            wait = 1;
+            break;
         case 'i':
             display_info = 1;
             break;
