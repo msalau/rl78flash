@@ -42,7 +42,7 @@ int serial_open(const char *port)
     else
     {
         struct termios options;
-        fcntl(fd, F_SETFL, 0);
+        (void)fcntl(fd, F_SETFL, 0);
         tcgetattr(fd, &options);
         cfsetispeed(&options, B115200);
         cfsetospeed(&options, B115200);

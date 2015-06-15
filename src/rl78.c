@@ -159,7 +159,7 @@ int rl78_recv(port_handle_t fd, void *data, int *len, int explen)
     {
         data_len = 256;
     }
-    if ((MAX_RESPONSE_LENGTH - 2) <= data_len
+    if ((MAX_RESPONSE_LENGTH - 4) < data_len
         || STX != in[0])
     {
         return RESPONSE_FORMAT_ERROR;
@@ -226,6 +226,7 @@ int rl78_cmd_baud_rate_set(port_handle_t fd, int baud, float voltage)
     default:
         fprintf(stderr, "Unsupported baudrate %ubps. Using default baudrate 115200bps.\n", baud);
         baud = 115200;
+        // fall through
     case 115200:
         baud_code = RL78_BAUD_115200;
         break;
@@ -696,10 +697,6 @@ int rl78_program(port_handle_t fd, void *code, unsigned int code_size, void *dat
     {
         printf("\n");
     }
-    if (0 > rc)
-    {
-        return rc;
-    }
     return rc;
 }
 
@@ -748,10 +745,6 @@ int rl78_erase(port_handle_t fd, unsigned int code_size, unsigned int data_size)
     if (2 == verbose_level)
     {
         printf("\n");
-    }
-    if (0 > rc)
-    {
-        return rc;
     }
     return rc;
 }
@@ -813,10 +806,6 @@ int rl78_verify(port_handle_t fd, void *code, unsigned int code_size, void *data
     if (2 == verbose_level)
     {
         printf("\n");
-    }
-    if (0 > rc)
-    {
-        return rc;
     }
     return rc;
 }

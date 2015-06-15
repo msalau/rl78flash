@@ -20,6 +20,7 @@
 #include "srec.h"
 #include "rl78.h"
 #include <stdio.h>
+#include <string.h>
 
 extern unsigned int verbose_level;
 
@@ -69,11 +70,20 @@ int srec_read(const char *filename,
     rewind(pfile);
     while (!feof(pfile))
     {
-        if (1 != fscanf(pfile, "%s\n", line))
+        if (NULL == fgets(line, sizeof line, pfile))
         {
-            fprintf(stderr, "Unable to read file \"%s\"\n", filename);
-            rc = SREC_IO_ERROR;
+            if (ferror(pfile))
+            {
+                fprintf(stderr, "Unable to read file \"%s\"\n", filename);
+                rc = SREC_IO_ERROR;
+            }
             break;
+        }
+        const size_t len = strlen(line);
+        if (0 == len || '\n' != line[len - 1])
+        {
+            fprintf(stderr, "Unable to parse file: line is too long\n");
+            rc = SREC_IO_ERROR;
         }
         if (4 <= verbose_level)
         {

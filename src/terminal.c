@@ -91,5 +91,6 @@ void terminal_start(port_handle_t fd, int baud, int mode, int reset)
         }
     }
     pthread_cancel(receiver);
+    pthread_join(receiver, NULL);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &tattr_backup);
 }

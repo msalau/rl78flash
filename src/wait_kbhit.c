@@ -38,7 +38,7 @@ void wait_kbhit (void)
     newt = oldt;
     newt.c_lflag &= ~(ICANON | ECHO);
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    getchar();
+    (void)getchar();
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 #endif
 }
