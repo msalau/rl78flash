@@ -2,3 +2,19 @@ language: c
 compiler: gcc
 script: make
 os: linux
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "Wx9oq+Cxi26u6IhJRtSbM0QemO4q92Ysz5j0EnQzpR5V+quIDPgsQA8jodUYW17x74hB6XpmQu1OpdstZnPPfZsBUnLSRD7SeMRt2Nicm+FM1QbTUBE7qWSm+mRT1CYjya9H+6qf0r/fYMs3Cnh+XYOJ4/l/FSO9SdsEJJmTkBk="
+
+addons:
+  coverity_scan:
+    project:
+      name: "msalau/rl78flash"
+      description: "Build submitted via Travis CI"
+    notification_email: maksim.salau@gmail.com
+    build_command_prepend: "make clean"
+    build_command: "make"
+    branch_pattern: coverity_scan
