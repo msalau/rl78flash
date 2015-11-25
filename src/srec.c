@@ -113,7 +113,7 @@ int srec_read(const char *filename,
         const char *data_p = line + 4 + address_length;
         unsigned char *memory;
 
-        if ((CODE_OFFSET + code_len) > (address + data_length))
+        if ((CODE_OFFSET + code_len) >= (address + data_length))
         {
             if (NULL == code)
             {
@@ -127,7 +127,7 @@ int srec_read(const char *filename,
             }
         }
         else if (DATA_OFFSET <= address
-            && (DATA_OFFSET + data_len) > (address + data_length))
+            && (DATA_OFFSET + data_len) >= (address + data_length))
         {
             if (NULL == data)
             {
