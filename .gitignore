@@ -3,3 +3,7 @@
 *.mot
 rl78flash*
 rl78g10flash*
+GPATH
+GRTAGS
+GSYMS
+GTAGS
