@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012-2014 Maksim Salau                                                                              *
+ * Copyright (c) 2012-2016 Maksim Salau                                                                              *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -70,14 +70,15 @@
 #define RL78_MIN_VOLTAGE    1.8f
 #define RL78_MAX_VOLTAGE    5.5f
 
-#define MODE_UART      1
-#define MODE_UART_1    0
-#define MODE_UART_2    MODE_UART
-#define MODE_RESET     2
-#define MODE_RESET_DTR 0
-#define MODE_RESET_RTS MODE_RESET
-#define MODE_MAX_VALUE (MODE_UART | MODE_RESET)
-#define MODE_MIN_VALUE 0
+#define MODE_UART         1
+#define MODE_UART_1       0
+#define MODE_UART_2       MODE_UART
+#define MODE_RESET        2
+#define MODE_RESET_DTR    0
+#define MODE_RESET_RTS    MODE_RESET
+#define MODE_MAX_VALUE    (MODE_UART | MODE_RESET)
+#define MODE_MIN_VALUE    0
+#define MODE_INVERT_RESET 0x100
 
 #include "serial.h"
 

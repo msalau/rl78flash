@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2014 Maksim Salau                                                                                    *
+ * Copyright (c) 2014,2016 Maksim Salau                                                                              *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -42,9 +42,10 @@
 #define RESPONSE_FORMAT_ERROR           (-2)
 #define RESPONSE_EXPECTED_LENGTH_ERROR  (-3)
 
-#define MODE_RESET_DTR 0
-#define MODE_RESET_RTS 1
-#define MODE_MAX_VALUE MODE_RESET_RTS
+#define MODE_RESET_DTR    0
+#define MODE_RESET_RTS    1
+#define MODE_MAX_VALUE    MODE_RESET_RTS
+#define MODE_INVERT_RESET 0x100
 
 #include "serial.h"
 

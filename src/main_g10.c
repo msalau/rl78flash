@@ -39,6 +39,7 @@ const char *usage =
     "\t\t\tn=1 Single-wire UART, Reset by DTR\n"
     "\t\t\tn=2 Single-wire UART, Reset by RTS\n"
     "\t\t\tdefault: n=1\n"
+    "\t-n\tInvert reset\n"
     "\t-t baud\tStart terminal with specified baudrate\n"
     "\t-v\tVerbose mode\n"
     "\t-h\tDisplay help\n";
@@ -50,12 +51,13 @@ int main(int argc, char *argv[])
     char reset_after = 0;
     char wait = 0;
     char mode = 0;
+    char invert_reset = 0;
     char terminal = 0;
     int terminal_baud = 0;
 
     char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "acvwrdm:t:h?")) != -1)
+    while ((opt = getopt(argc, argv, "acvwrdm:nt:h?")) != -1)
     {
         switch (opt)
         {
@@ -97,12 +99,19 @@ int main(int argc, char *argv[])
         case 'd':
             wait = 1;
             break;
+        case 'n':
+            invert_reset = 1;
+            break;
         case 'h':
         case '?':
         default:
             printf("%s", usage);
             return 0;
         }
+    }
+    if (invert_reset)
+    {
+        mode |= MODE_INVERT_RESET;
     }
     char *portname = NULL;
     char *filename = NULL;

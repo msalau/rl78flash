@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012-2014 Maksim Salau                                                                              *
+ * Copyright (c) 2012-2016 Maksim Salau                                                                              *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -46,6 +46,7 @@ const char *usage =
     "\t\t\tn=3 Single-wire UART, Reset by RTS\n"
     "\t\t\tn=4 Two-wire UART, Reset by RTS\n"
     "\t\t\tdefault: n=1\n"
+    "\t-n\tInvert reset\n"
     "\t-p v\tSpecify power supply voltage\n"
     "\t\t\tdefault: 3.3\n"
     "\t-t baud\tStart terminal with specified baudrate\n"
@@ -60,6 +61,7 @@ int main(int argc, char *argv[])
     char wait = 0;
     char display_info = 0;
     char mode = 0;
+    char invert_reset = 0;
     int baud = 115200;
     float voltage = 3.3f;
     char terminal = 0;
@@ -67,7 +69,7 @@ int main(int argc, char *argv[])
 
     char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "ab:cvwrdeim:p:t:h?")) != -1)
+    while ((opt = getopt(argc, argv, "ab:cvwrdeim:np:t:h?")) != -1)
     {
         switch (opt)
         {
@@ -139,12 +141,19 @@ int main(int argc, char *argv[])
         case 'i':
             display_info = 1;
             break;
+        case 'n':
+            invert_reset = 1;
+            break;
         case 'h':
         case '?':
         default:
             printf("%s", usage);
             return 0;
         }
+    }
+    if (invert_reset)
+    {
+        mode |= MODE_INVERT_RESET;
     }
     char *portname = NULL;
     char *filename = NULL;
