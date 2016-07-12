@@ -9,6 +9,8 @@ OBJS_WIN32 = src/terminal_win32.o src/serial_win32.o
 
 all: rl78flash rl78g10flash
 
+win32: rl78flash.exe rl78g10flash.exe
+
 rl78flash: $(OBJS) $(OBJS_LINUX)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
@@ -23,12 +25,6 @@ rl78g10flash.exe: $(OBJS_G10) $(OBJS_WIN32)
 
 clean:
 	-rm -f rl78flash rl78flash.exe rl78g10flash rl78g10flash.exe src/*.o src/*~ *~
-
-cygwin:
-	make CC=i686-pc-cygwin-gcc
-
-win32:
-	make CC=i686-pc-mingw32-gcc rl78flash.exe rl78g10flash.exe
 
 install: rl78flash rl78g10flash
 	mkdir -p $(DESTDIR)/usr/bin
