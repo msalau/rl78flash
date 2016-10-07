@@ -9,7 +9,7 @@ OBJS_G10 := src/rl78g10.o src/main_g10.o src/srec.o src/crc16_ccit.o src/wait_kb
 OBJS_LINUX := src/terminal.o src/serial.o
 OBJS_WIN32 := src/terminal_win32.o src/serial_win32.o
 
-.PHONY: all win32 clean install zip
+.PHONY: all win32 clean install win32-zip
 
 all: rl78flash rl78g10flash
 
@@ -34,11 +34,12 @@ install: rl78flash rl78g10flash
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	install -m 755 -t $(DESTDIR)$(PREFIX)/bin $^
 
-ifeq ($(MAKECMDGOALS),zip)
+ifeq ($(MAKECMDGOALS),win32-zip)
 
-NAME := rl78flash-$(shell git describe --tags)
+VERSION := $(shell git describe --tags)
+NAME := rl78flash-$(VERSION:v%=%)-win32
 
-zip: $(NAME).zip
+win32-zip: $(NAME).zip
 
 $(NAME).zip: rl78flash.exe rl78g10flash.exe README.md
 	mkdir -p ./$(NAME)
