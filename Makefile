@@ -19,13 +19,13 @@ rl78flash: $(OBJS) $(OBJS_LINUX)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 rl78flash.exe: $(OBJS) $(OBJS_WIN32)
-	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ $^
 
 rl78g10flash: $(OBJS_G10) $(OBJS_LINUX)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 rl78g10flash.exe: $(OBJS_G10) $(OBJS_WIN32)
-	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ $^
 
 clean:
 	-rm -f rl78flash rl78flash.exe rl78g10flash rl78g10flash.exe src/*.o src/*~ *~
