@@ -1,0 +1,8 @@
+Source: rl78flash-@VERSION@.tar.gz
+Section: devel
+Priority: optional
+Maintainer: Maksim Salau <maksim.salau@gmail.com>
+Package: rl78flash
+Version: @VERSION@
+Architecture: @ARCH@
+Description: Command line tool to flash Renesas RL78 microcontrollers
