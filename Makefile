@@ -1,4 +1,4 @@
-CFLAGS := -O2 -Wall -Wextra
+CFLAGS := -O2 -Wall -Wextra -Werror
 LDFLAGS := -s
 LIBS := -lpthread
 
