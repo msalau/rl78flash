@@ -9,6 +9,7 @@ matrix:
   include:
     # Linux
     - compiler: gcc
+      env: DEPLOY_TO_PACKAGECLOUD=1
       script:
         - make clean
         - make deb
@@ -71,5 +72,6 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
+      condition: "$DEPLOY_TO_PACKAGECLOUD = 1"
     token:
       secure: a8guvC+i9+2VITcstiiI7VFmVhFu5KmpMj820Ju4720pJKFPguuhA6ld3Mr6TXJdMKhqk5Vp8YYl/6L9xWolgcTB2Or2HM2BCCS1FnADf5MiEiBK3hJUnTHSAzElzh7fPJino0unvRQxC0wkDRex6HcU3prsN9cYi8r7L4DieAI=
