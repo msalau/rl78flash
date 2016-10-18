@@ -62,6 +62,8 @@ port_handle_t serial_open(const char *port)
         dcbSerialParams.ByteSize = 8;
         dcbSerialParams.StopBits = TWOSTOPBITS;
         dcbSerialParams.Parity = NOPARITY;
+        dcbSerialParams.fDtrControl = DTR_CONTROL_DISABLE;
+        dcbSerialParams.fRtsControl = RTS_CONTROL_DISABLE;
         SetCommState(fd, &dcbSerialParams);
 
         COMMTIMEOUTS timeouts;

@@ -1,9 +1,12 @@
 *~
 *.[od]
 *.mot
-rl78flash*
-rl78g10flash*
+rl78flash
+rl78g10flash
+rl78flash.exe
+rl78g10flash.exe
+*TAGS
 GPATH
-GRTAGS
 GSYMS
-GTAGS
+*.zip
+*.deb

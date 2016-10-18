@@ -20,10 +20,14 @@ Features:
 
 # Download
 
-Binary version for Windows can be downloaded from
+Binary versions can be downloaded from
 https://github.com/msalau/rl78flash/releases
 
-Linux users are encouraged to build rl78flash from source.
+deb packages are available on packagecloud
+
+[![packagecloud.io/msalau/rl78flash](https://packagecloud.io/assets/packagecloud-badge-fbea7fd09f5aab38e8d59fec16f2268c.png)](https://packagecloud.io/msalau/rl78flash)
+
+Of course one can build rl78flash from source.
 
 # Build
 

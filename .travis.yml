@@ -1,7 +1,40 @@
 language: c
-compiler: gcc
-script: make
 os: linux
+compiler: gcc
+script:
+  - make clean
+  - make
+
+matrix:
+  include:
+    # Linux
+    - compiler: gcc
+      env: DEPLOY_TO_PACKAGECLOUD=1
+      script:
+        - make clean
+        - make deb
+    # Win32
+    - compiler: i686-w64-mingw32-gcc
+      addons:
+        apt:
+          packages:
+            - gcc-mingw-w64-base
+            - binutils-mingw-w64-i686
+            - gcc-mingw-w64-i686
+      script:
+        - make clean
+        - make zip
+    # Win64
+    - compiler: x86_64-w64-mingw32-gcc
+      addons:
+        apt:
+          packages:
+            - gcc-mingw-w64-base
+            - binutils-mingw-w64-x86-64
+            - gcc-mingw-w64-x86-64
+      script:
+        - make clean
+        - make zip
 
 env:
   global:
@@ -18,3 +51,27 @@ addons:
     build_command_prepend: "make clean"
     build_command: "make"
     branch_pattern: coverity_scan
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: kESi7jtWoN0zauhYOnQ+Td9fo6naGA7v9S9u1DKQQL8OuXNZz150ytp3G13GsqBFKQYfksnmP7sKfWGlJnC4tEQ8axBRD913gW24rkgySL9CuhCXGuv+yaPRjYzVfgt0NFpCqes3boz+wCOjez55ZXY5F8oWFEpzp+4OGQCvVoQ=
+    file_glob: true
+    file:
+      - rl78flash-*.zip
+      - rl78flash_*.deb
+    skip_cleanup: true
+    on:
+      repo: msalau/rl78flash
+      tags: true
+
+  - provider: packagecloud
+    username: msalau
+    repository: rl78flash
+    dist: debian/jessie
+    skip_cleanup: true
+    on:
+      tags: true
+      condition: "$DEPLOY_TO_PACKAGECLOUD = 1"
+    token:
+      secure: a8guvC+i9+2VITcstiiI7VFmVhFu5KmpMj820Ju4720pJKFPguuhA6ld3Mr6TXJdMKhqk5Vp8YYl/6L9xWolgcTB2Or2HM2BCCS1FnADf5MiEiBK3hJUnTHSAzElzh7fPJino0unvRQxC0wkDRex6HcU3prsN9cYi8r7L4DieAI=
