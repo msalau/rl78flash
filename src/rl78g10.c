@@ -32,14 +32,14 @@ static int get_size_from_code (unsigned int code)
     int size;
     switch (code)
     {
-    case 0x01: size = 512; break; 
-    case 0x03: size = 1024; break; 
-    case 0x07: size = 1024*2; break; 
-    case 0x0F: size = 1024*4; break; 
-    case 0x1F: size = 1024*8; break; 
-    case 0x3F: size = 1024*16; break; 
-    case 0x7F: size = 1024*32; break; 
-    case 0xFF: size = 1024*64; break; 
+    case 0x01: size = 512; break;
+    case 0x03: size = 1024; break;
+    case 0x07: size = 1024*2; break;
+    case 0x0F: size = 1024*4; break;
+    case 0x1F: size = 1024*8; break;
+    case 0x3F: size = 1024*16; break;
+    case 0x7F: size = 1024*32; break;
+    case 0xFF: size = 1024*64; break;
     default:   size = -1; break;
     }
     return size;
@@ -48,7 +48,7 @@ static int get_size_from_code (unsigned int code)
 static void rl78g10_set_reset(port_handle_t fd, int mode, int value)
 {
     int level = (mode & MODE_INVERT_RESET) ? !value : value;
-    if (MODE_RESET_RTS == mode)
+    if (MODE_RESET_RTS == (mode & MODE_RESET))
     {
         serial_set_rts(fd, level);
     }

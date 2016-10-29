@@ -78,7 +78,7 @@
 #define MODE_RESET_RTS    MODE_RESET
 #define MODE_MAX_VALUE    (MODE_UART | MODE_RESET)
 #define MODE_MIN_VALUE    0
-#define MODE_INVERT_RESET 0x100
+#define MODE_INVERT_RESET 0x80
 
 #include "serial.h"
 

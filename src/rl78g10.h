@@ -42,10 +42,11 @@
 #define RESPONSE_FORMAT_ERROR           (-2)
 #define RESPONSE_EXPECTED_LENGTH_ERROR  (-3)
 
+#define MODE_RESET        1
 #define MODE_RESET_DTR    0
-#define MODE_RESET_RTS    1
-#define MODE_MAX_VALUE    MODE_RESET_RTS
-#define MODE_INVERT_RESET 0x100
+#define MODE_RESET_RTS    MODE_RESET
+#define MODE_MAX_VALUE    MODE_RESET
+#define MODE_INVERT_RESET 0x80
 
 #include "serial.h"
 
