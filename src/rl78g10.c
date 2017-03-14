@@ -71,7 +71,7 @@ int rl78g10_reset_init(port_handle_t fd, int wait, int mode)
     serial_flush(fd);
     usleep(1000);
     rl78g10_set_reset(fd, mode, 1);                         /* RESET -> 1 */
-    usleep(1000);
+    usleep(2000);
     serial_set_txd(fd, 1);                                  /* TOOL0 -> 1 */
     usleep(1000);
     serial_flush(fd);
