@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Erase\n");
                 }
-                rl78_erase(fd, code_size, data_size);
+                rc = rl78_erase(fd, code_size, data_size);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Erase failed\n");

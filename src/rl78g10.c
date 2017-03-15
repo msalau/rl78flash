@@ -32,14 +32,14 @@ static int get_size_from_code (unsigned int code)
     int size;
     switch (code)
     {
-    case 0x01: size = 512; break; 
-    case 0x03: size = 1024; break; 
-    case 0x07: size = 1024*2; break; 
-    case 0x0F: size = 1024*4; break; 
-    case 0x1F: size = 1024*8; break; 
-    case 0x3F: size = 1024*16; break; 
-    case 0x7F: size = 1024*32; break; 
-    case 0xFF: size = 1024*64; break; 
+    case 0x01: size = 512; break;
+    case 0x03: size = 1024; break;
+    case 0x07: size = 1024*2; break;
+    case 0x0F: size = 1024*4; break;
+    case 0x1F: size = 1024*8; break;
+    case 0x3F: size = 1024*16; break;
+    case 0x7F: size = 1024*32; break;
+    case 0xFF: size = 1024*64; break;
     default:   size = -1; break;
     }
     return size;
@@ -71,7 +71,7 @@ int rl78g10_reset_init(port_handle_t fd, int wait, int mode)
     serial_flush(fd);
     usleep(1000);
     rl78g10_set_reset(fd, mode, 1);                         /* RESET -> 1 */
-    usleep(1000);
+    usleep(2000);
     serial_set_txd(fd, 1);                                  /* TOOL0 -> 1 */
     usleep(1000);
     serial_flush(fd);
@@ -210,7 +210,7 @@ int rl78g10_crc_check(port_handle_t fd, const void *data, int size)
     buf[0] = STATUS_ACK;
     serial_write(fd, buf, 1);
     serial_read(fd, buf, 1);
-    
+
     /* Wait till end of CRC calculation */
     int i = 100;
     int n;
@@ -230,7 +230,7 @@ int rl78g10_crc_check(port_handle_t fd, const void *data, int size)
         perror("Unable to read from port:");
         return -1;
     }
-    
+
     if (buf[0] != STATUS_ACK)
     {
         fprintf(stderr, "Unexpected response %02X\n", buf[1]);
@@ -250,4 +250,3 @@ int rl78g10_crc_check(port_handle_t fd, const void *data, int size)
     }
     return 0;
 }
-
