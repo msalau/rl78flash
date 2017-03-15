@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012-2015 Maksim Salau                                                                              *
+ * Copyright (c) 2012-2016 Maksim Salau                                                                              *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -29,13 +29,15 @@ static unsigned char communication_mode;
 
 static void rl78_set_reset(port_handle_t fd, int mode, int value)
 {
+    int level  = (mode & MODE_INVERT_RESET) ? !value : value;
+
     if (MODE_RESET_RTS == (mode & MODE_RESET))
     {
-        serial_set_rts(fd, value);
+        serial_set_rts(fd, level);
     }
     else
     {
-        serial_set_dtr(fd, value);
+        serial_set_dtr(fd, level);
     }
 }
 
@@ -54,7 +56,9 @@ int rl78_reset_init(port_handle_t fd, int wait, int baud, int mode, float voltag
     }
     if (4 <= verbose_level)
     {
-        printf("Using communication mode %u\n", mode + 1);
+        printf("Using communication mode %u%s\n",
+               (mode & (MODE_UART | MODE_RESET)) + 1,
+               (mode & MODE_INVERT_RESET) ? " with RESET inversion" : "");
     }
     rl78_set_reset(fd, mode, 0);                            /* RESET -> 0 */
     serial_set_txd(fd, 0);                                  /* TOOL0 -> 0 */

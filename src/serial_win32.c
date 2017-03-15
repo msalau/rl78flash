@@ -23,6 +23,8 @@
 #include <stdio.h>
 
 extern int verbose_level;
+static int last_dtr_setting;
+static int last_rts_setting;
 
 port_handle_t serial_open(const char *port)
 {
@@ -62,8 +64,8 @@ port_handle_t serial_open(const char *port)
         dcbSerialParams.ByteSize = 8;
         dcbSerialParams.StopBits = TWOSTOPBITS;
         dcbSerialParams.Parity = NOPARITY;
-        dcbSerialParams.fDtrControl = DTR_CONTROL_DISABLE;
-        dcbSerialParams.fRtsControl = RTS_CONTROL_DISABLE;
+        last_dtr_setting = (DTR_CONTROL_ENABLE == dcbSerialParams.fDtrControl) ? SETDTR : CLRDTR;
+        last_rts_setting = (RTS_CONTROL_ENABLE == dcbSerialParams.fRtsControl) ? SETRTS : CLRRTS;
         dcbSerialParams.fInX = FALSE;
         dcbSerialParams.fOutX = FALSE;
         SetCommState(fd, &dcbSerialParams);
@@ -85,6 +87,8 @@ int serial_set_baud(port_handle_t fd, int baud)
     DCB dcbSerialParams;
     GetCommState(fd, &dcbSerialParams);
     dcbSerialParams.BaudRate = baud;
+    dcbSerialParams.fDtrControl = (SETDTR == last_dtr_setting) ? DTR_CONTROL_ENABLE : DTR_CONTROL_DISABLE;
+    dcbSerialParams.fRtsControl = (SETRTS == last_rts_setting) ? RTS_CONTROL_ENABLE : RTS_CONTROL_DISABLE;
     return SetCommState(fd, &dcbSerialParams) != 0 ? 0 : -1;
 }
 
@@ -118,6 +122,7 @@ int serial_set_dtr(port_handle_t fd, int level)
     {
         command = SETDTR;
     }
+    last_dtr_setting = command;
     return EscapeCommFunction(fd, command) != 0 ? 0 : -1;
 }
 
@@ -132,6 +137,7 @@ int serial_set_rts(port_handle_t fd, int level)
     {
         command = SETRTS;
     }
+    last_rts_setting = command;
     return EscapeCommFunction(fd, command) != 0 ? 0 : -1;
 }
 

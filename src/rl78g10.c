@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2014 Maksim Salau                                                                                    *
+ * Copyright (c) 2014,2016 Maksim Salau                                                                              *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -47,13 +47,14 @@ static int get_size_from_code (unsigned int code)
 
 static void rl78g10_set_reset(port_handle_t fd, int mode, int value)
 {
-    if (MODE_RESET_RTS == mode)
+    int level = (mode & MODE_INVERT_RESET) ? !value : value;
+    if (MODE_RESET_RTS == (mode & MODE_RESET))
     {
-        serial_set_rts(fd, value);
+        serial_set_rts(fd, level);
     }
     else
     {
-        serial_set_dtr(fd, value);
+        serial_set_dtr(fd, level);
     }
 }
 
