@@ -75,7 +75,7 @@ Step-by-step procedure:
 
 Example: Erase RPBRL78G14 with RESET acting as a GPIO
 ```
-$ ./rl78flash -dive -m3 /dev/ttyUSB0
+$ ./rl78flash -dive -nm3 /dev/ttyUSB0
 Turn MCU's power on and press any key...
 Device: R5F104LE
 Code size: 64 kB
