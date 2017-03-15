@@ -56,7 +56,9 @@ int rl78_reset_init(port_handle_t fd, int wait, int baud, int mode, float voltag
     }
     if (4 <= verbose_level)
     {
-        printf("Using communication mode %u\n", mode + 1);
+        printf("Using communication mode %u%s\n",
+               (mode & (MODE_UART | MODE_RESET)) + 1,
+               (mode & MODE_INVERT_RESET) ? " with RESET inversion" : "");
     }
     rl78_set_reset(fd, mode, 0);                            /* RESET -> 0 */
     serial_set_txd(fd, 0);                                  /* TOOL0 -> 0 */
