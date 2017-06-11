@@ -278,12 +278,25 @@ int main(int argc, char *argv[])
             {
                 if (1 <= verbose_level)
                 {
-                    printf("Write\n");
+                    printf("Write code flash\n");
                 }
-                rc = rl78_program(fd, code, code_size, data, data_size);
+                rc = rl78_program(fd, CODE_OFFSET, code, code_size);
                 if (0 != rc)
                 {
-                    fprintf(stderr, "Write failed\n");
+                    fprintf(stderr, "Code flash write failed\n");
+                    break;
+                }
+            }
+            if (1 == write && data_size)
+            {
+                if (1 <= verbose_level)
+                {
+                    printf("Write data flash\n");
+                }
+                rc = rl78_program(fd, DATA_OFFSET, data, data_size);
+                if (0 != rc)
+                {
+                    fprintf(stderr, "Data flash write failed\n");
                     break;
                 }
             }
