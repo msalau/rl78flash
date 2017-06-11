@@ -304,12 +304,25 @@ int main(int argc, char *argv[])
             {
                 if (1 <= verbose_level)
                 {
-                    printf("Verify\n");
+                    printf("Verify Code flash\n");
                 }
-                rc = rl78_verify(fd, code, code_size, data, data_size);
+                rc = rl78_verify(fd, CODE_OFFSET, code, code_size);
                 if (0 != rc)
                 {
-                    fprintf(stderr, "Verify failed\n");
+                    fprintf(stderr, "Code flash verification failed\n");
+                    break;
+                }
+            }
+            if (1 == verify && data_size)
+            {
+                if (1 <= verbose_level)
+                {
+                    printf("Verify Data flash\n");
+                }
+                rc = rl78_verify(fd, DATA_OFFSET, data, data_size);
+                if (0 != rc)
+                {
+                    fprintf(stderr, "Data flash verification failed\n");
                     break;
                 }
             }
