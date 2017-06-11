@@ -234,12 +234,25 @@ int main(int argc, char *argv[])
             {
                 if (1 <= verbose_level)
                 {
-                    printf("Erase\n");
+                    printf("Erase code flash\n");
                 }
-                rc = rl78_erase(fd, code_size, data_size);
+                rc = rl78_erase(fd, CODE_OFFSET, code_size);
                 if (0 != rc)
                 {
-                    fprintf(stderr, "Erase failed\n");
+                    fprintf(stderr, "Code flash erase failed\n");
+                    break;
+                }
+            }
+            if (1 == erase && data_size)
+            {
+                if (1 <= verbose_level)
+                {
+                    printf("Erase data flash\n");
+                }
+                rc = rl78_erase(fd, DATA_OFFSET, data_size);
+                if (0 != rc)
+                {
+                    fprintf(stderr, "Data flash erase failed\n");
                     break;
                 }
             }

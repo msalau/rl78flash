@@ -97,7 +97,7 @@ int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned 
 unsigned int rl78_checksum(const void *rom, unsigned int len);
 int rl78_cmd_verify(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom);
 int rl78_program(port_handle_t fd, void *code, unsigned int code_size, void *data, unsigned int data_size);
-int rl78_erase(port_handle_t fd, unsigned int code_size, unsigned int data_size);
+int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size);
 int rl78_verify(port_handle_t fd, void *code, unsigned int code_size, void *data, unsigned int data_size);
 
 #endif  // RL78_H__
