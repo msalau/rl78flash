@@ -31,7 +31,7 @@ int verbose_level = 0;
 const char *usage =
     "rl78flash [options] <port> [<file>]\n"
     "\t-v\tVerbose mode (several times increase verbose level)\n"
-    "\t-i\tDispaly info about MCU\n"
+    "\t-i\tDisplay info about MCU\n"
     "\t-a\tAuto mode (Erase-Write-Verify-Reset)\n"
     "\t-e\tErase memory\n"
     "\t-w\tWrite memory\n"
