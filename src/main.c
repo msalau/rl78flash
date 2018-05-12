@@ -234,12 +234,25 @@ int main(int argc, char *argv[])
             {
                 if (1 <= verbose_level)
                 {
-                    printf("Erase\n");
+                    printf("Erase code flash\n");
                 }
-                rc = rl78_erase(fd, code_size, data_size);
+                rc = rl78_erase(fd, CODE_OFFSET, code_size);
                 if (0 != rc)
                 {
-                    fprintf(stderr, "Erase failed\n");
+                    fprintf(stderr, "Code flash erase failed\n");
+                    break;
+                }
+            }
+            if (1 == erase && data_size)
+            {
+                if (1 <= verbose_level)
+                {
+                    printf("Erase data flash\n");
+                }
+                rc = rl78_erase(fd, DATA_OFFSET, data_size);
+                if (0 != rc)
+                {
+                    fprintf(stderr, "Data flash erase failed\n");
                     break;
                 }
             }
@@ -265,12 +278,25 @@ int main(int argc, char *argv[])
             {
                 if (1 <= verbose_level)
                 {
-                    printf("Write\n");
+                    printf("Write code flash\n");
                 }
-                rc = rl78_program(fd, code, code_size, data, data_size);
+                rc = rl78_program(fd, CODE_OFFSET, code, code_size);
                 if (0 != rc)
                 {
-                    fprintf(stderr, "Write failed\n");
+                    fprintf(stderr, "Code flash write failed\n");
+                    break;
+                }
+            }
+            if (1 == write && data_size)
+            {
+                if (1 <= verbose_level)
+                {
+                    printf("Write data flash\n");
+                }
+                rc = rl78_program(fd, DATA_OFFSET, data, data_size);
+                if (0 != rc)
+                {
+                    fprintf(stderr, "Data flash write failed\n");
                     break;
                 }
             }
@@ -278,12 +304,25 @@ int main(int argc, char *argv[])
             {
                 if (1 <= verbose_level)
                 {
-                    printf("Verify\n");
+                    printf("Verify Code flash\n");
                 }
-                rc = rl78_verify(fd, code, code_size, data, data_size);
+                rc = rl78_verify(fd, CODE_OFFSET, code, code_size);
                 if (0 != rc)
                 {
-                    fprintf(stderr, "Verify failed\n");
+                    fprintf(stderr, "Code flash verification failed\n");
+                    break;
+                }
+            }
+            if (1 == verify && data_size)
+            {
+                if (1 <= verbose_level)
+                {
+                    printf("Verify Data flash\n");
+                }
+                rc = rl78_verify(fd, DATA_OFFSET, data, data_size);
+                if (0 != rc)
+                {
+                    fprintf(stderr, "Data flash verification failed\n");
                     break;
                 }
             }
