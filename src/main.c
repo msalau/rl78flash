@@ -161,6 +161,7 @@ int main(int argc, char *argv[])
     {
     case 2:
         filename = argv[optind + 1];
+        /* fall-through */
     case 1:
         portname = argv[optind + 0];
         break;
