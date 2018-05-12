@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include "rl78.h"
 #include "serial.h"
 #include "srec.h"
@@ -84,7 +85,7 @@ int main(int argc, char *argv[])
             if (optarg == endp)
             {
                 printf("%s", usage);
-                return 0;
+                return EINVAL;
             }
             break;
         case 'm':
@@ -94,7 +95,7 @@ int main(int argc, char *argv[])
                 || MODE_MIN_VALUE > mode)
             {
                 printf("%s", usage);
-                return 0;
+                return EINVAL;
             }
             break;
         case 't':
@@ -103,21 +104,21 @@ int main(int argc, char *argv[])
             if (optarg == endp)
             {
                 printf("%s", usage);
-                return 0;
+                return EINVAL;
             }
             break;
         case 'p':
             if (1 != sscanf(optarg, "%f", &voltage))
             {
                 printf("%s", usage);
-                return 0;
+                return EINVAL;
             }
             if (RL78_MIN_VOLTAGE > voltage
                 || RL78_MAX_VOLTAGE < voltage )
             {
                 fprintf(stderr, "Operating voltage is out of range. Operating voltage must be in range %1.1fV..%1.1fV.\n",
                         RL78_MIN_VOLTAGE, RL78_MAX_VOLTAGE);
-                return 0;
+                return EINVAL;
             }
             break;
         case 'v':
@@ -148,7 +149,7 @@ int main(int argc, char *argv[])
         case '?':
         default:
             printf("%s", usage);
-            return 0;
+            return ECANCELED;
         }
     }
     if (invert_reset)
@@ -167,7 +168,7 @@ int main(int argc, char *argv[])
         break;
     default:
         printf("%s", usage);
-        return 0;
+        return EINVAL;
     }
 
     // If file is not specified, but required - show error message
@@ -175,14 +176,14 @@ int main(int argc, char *argv[])
         && (1 == write || 1 == verify))
     {
         fprintf(stderr, "File not specified\n");
-        return -1;
+        return ENOENT;
     }
 
     port_handle_t fd = serial_open(portname);
     int rc = 0;
     if (INVALID_HANDLE_VALUE == fd)
     {
-        return -1;
+        return EBADF;
     }
 
     // If no actions are specified - do nothing :)
@@ -196,6 +197,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    int retcode = 0;
     do
     {
         if (1 == write
@@ -207,12 +209,14 @@ int main(int argc, char *argv[])
             if (0 > rc)
             {
                 fprintf(stderr, "Initialization failed\n");
+                retcode = EIO;
                 break;
             }
             rc = rl78_cmd_reset(fd);
             if (0 > rc)
             {
                 fprintf(stderr, "Synchronization failed\n");
+                retcode = EIO;
                 break;
             }
             char device_name[11];
@@ -221,6 +225,7 @@ int main(int argc, char *argv[])
             if (0 > rc)
             {
                 fprintf(stderr, "Silicon signature read failed\n");
+                retcode = EIO;
                 break;
             }
             if (1 == display_info)
@@ -241,6 +246,7 @@ int main(int argc, char *argv[])
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash erase failed\n");
+                    retcode = EIO;
                     break;
                 }
             }
@@ -254,6 +260,7 @@ int main(int argc, char *argv[])
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash erase failed\n");
+                    retcode = EIO;
                     break;
                 }
             }
@@ -272,6 +279,7 @@ int main(int argc, char *argv[])
                 if (0 != rc)
                 {
                     fprintf(stderr, "Read failed\n");
+                    retcode = EIO;
                     break;
                 }
             }
@@ -285,6 +293,7 @@ int main(int argc, char *argv[])
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash write failed\n");
+                    retcode = EIO;
                     break;
                 }
             }
@@ -298,6 +307,7 @@ int main(int argc, char *argv[])
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash write failed\n");
+                    retcode = EIO;
                     break;
                 }
             }
@@ -311,6 +321,7 @@ int main(int argc, char *argv[])
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash verification failed\n");
+                    retcode = EIO;
                     break;
                 }
             }
@@ -324,6 +335,7 @@ int main(int argc, char *argv[])
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash verification failed\n");
+                    retcode = EIO;
                     break;
                 }
             }
@@ -350,5 +362,5 @@ int main(int argc, char *argv[])
     while (0);
     serial_close(fd);
     printf("\n");
-    return 0;
+    return retcode;
 }
