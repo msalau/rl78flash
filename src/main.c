@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
             baud = strtoul(optarg, &endp, 10);
             if (optarg == endp)
             {
+                fprintf(stderr, "Baudrate is not defined\n");
                 printf("%s", usage);
                 return EINVAL;
             }
@@ -94,6 +95,7 @@ int main(int argc, char *argv[])
                 || MODE_MAX_VALUE < mode
                 || MODE_MIN_VALUE > mode)
             {
+                fprintf(stderr, "Invalid mode\n");
                 printf("%s", usage);
                 return EINVAL;
             }
@@ -103,6 +105,7 @@ int main(int argc, char *argv[])
             terminal_baud = strtol(optarg, &endp, 10);
             if (optarg == endp)
             {
+                fprintf(stderr, "Terminal baudrate is not defined\n");
                 printf("%s", usage);
                 return EINVAL;
             }
@@ -110,6 +113,7 @@ int main(int argc, char *argv[])
         case 'p':
             if (1 != sscanf(optarg, "%f", &voltage))
             {
+                fprintf(stderr, "Invalid voltage value: %s\n", optarg);
                 printf("%s", usage);
                 return EINVAL;
             }
@@ -147,9 +151,12 @@ int main(int argc, char *argv[])
             break;
         case 'h':
         case '?':
-        default:
             printf("%s", usage);
             return ECANCELED;
+        default:
+            fprintf(stderr, "Unknown argument: %c\n", opt);
+            printf("%s", usage);
+            return EINVAL;
         }
     }
     if (invert_reset)
