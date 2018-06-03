@@ -13,6 +13,11 @@ matrix:
       script:
         - make clean
         - make deb
+      addons:
+        apt:
+          packages:
+            - fakeroot
+            - dpkg
     # Win32
     - compiler: i686-w64-mingw32-gcc
       addons:

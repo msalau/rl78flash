@@ -639,15 +639,11 @@ int allFFs(const void *mem, unsigned int size)
     return 1;
 }
 
-int rl78_program(port_handle_t fd, void *code, unsigned int code_size, void *data, unsigned int data_size)
+int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size)
 {
-    // Suppress  "unused variable" warnings
-    (void)data;
-    (void)data_size;
     // Make sure size is aligned to flash block boundary
-    unsigned int i = code_size & ~(FLASH_BLOCK_SIZE - 1);
-    unsigned char *mem = (unsigned char*)code;
-    unsigned int address = CODE_OFFSET;
+    unsigned int i = size & ~(FLASH_BLOCK_SIZE - 1);
+    const unsigned char *mem = (const unsigned char*)data;
     int rc = 0;;
     for (; i; i -= FLASH_BLOCK_SIZE)
     {
@@ -704,13 +700,11 @@ int rl78_program(port_handle_t fd, void *code, unsigned int code_size, void *dat
     return rc;
 }
 
-int rl78_erase(port_handle_t fd, unsigned int code_size, unsigned int data_size)
+int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size)
 {
-    // Suppress  "unused variable" warnings
-    (void)data_size;
     // Make sure size is aligned to flash block boundary
-    unsigned int i = code_size & ~(FLASH_BLOCK_SIZE - 1);
-    unsigned int address = CODE_OFFSET;
+    unsigned int i = size & ~(FLASH_BLOCK_SIZE - 1);
+    unsigned int address = start_address;
     int rc = 0;
     for (; i; i -= FLASH_BLOCK_SIZE)
     {
@@ -753,15 +747,11 @@ int rl78_erase(port_handle_t fd, unsigned int code_size, unsigned int data_size)
     return rc;
 }
 
-int rl78_verify(port_handle_t fd, void *code, unsigned int code_size, void *data, unsigned int data_size)
+int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size)
 {
-    // Suppress  "unused variable" warnings
-    (void)data;
-    (void)data_size;
     // Make sure size is aligned to flash block boundary
-    unsigned int i = code_size & ~(FLASH_BLOCK_SIZE - 1);
-    unsigned char *mem = (unsigned char*)code;
-    unsigned int address = CODE_OFFSET;
+    unsigned int i = size & ~(FLASH_BLOCK_SIZE - 1);
+    const unsigned char *mem = (const unsigned char*)data;
     int rc = 0;
     for (; i; i -= FLASH_BLOCK_SIZE)
     {
