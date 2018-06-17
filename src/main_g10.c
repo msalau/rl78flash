@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
             if (optarg == endp
                 || MODE_MAX_VALUE < mode)
             {
+                fprintf(stderr, "Invalid mode\n");
                 printf("%s", usage);
                 return EINVAL;
             }
@@ -81,6 +82,7 @@ int main(int argc, char *argv[])
             terminal_baud = strtol(optarg, &endp, 10);
             if (optarg == endp)
             {
+                fprintf(stderr, "Terminal baudrate is not defined\n");
                 printf("%s", usage);
                 return EINVAL;
             }
@@ -105,9 +107,12 @@ int main(int argc, char *argv[])
             break;
         case 'h':
         case '?':
-        default:
             printf("%s", usage);
             return ECANCELED;
+        default:
+            fprintf(stderr, "Unknown argument: %c\n", opt);
+            printf("%s", usage);
+            return EINVAL;
         }
     }
     if (invert_reset)
