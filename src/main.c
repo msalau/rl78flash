@@ -37,6 +37,8 @@ const char *usage =
     "\t-e\tErase memory\n"
     "\t-w\tWrite memory\n"
     "\t-c\tVerify memory\n"
+    "\t-x\tDisable Data Flash\n"
+    "\t-y\tDisable Code Flash\n"
     "\t-r\tReset MCU (switch to RUN mode)\n"
     "\t-d\tDelay bootloader initialization till keypress\n"
     "\t-b baud\tSet baudrate (supported baudrates: 115200, 250000, 500000, 1000000)\n"
@@ -48,6 +50,10 @@ const char *usage =
     "\t\t\tn=4 Two-wire UART, Reset by RTS\n"
     "\t\t\tdefault: n=1\n"
     "\t-n\tInvert reset\n"
+    "\t-f n\tSet file format\n"
+    "\t\t\tn=0 S-record\n"
+    "\t\t\tn=1 Intel Hex\n"
+    "\t\t\tdefault: n=0\n"
     "\t-p v\tSpecify power supply voltage\n"
     "\t\t\tdefault: 3.3\n"
     "\t-t baud\tStart terminal with specified baudrate\n"
@@ -67,13 +73,22 @@ int main(int argc, char *argv[])
     float voltage = 3.3f;
     char terminal = 0;
     int terminal_baud = 0;
+    char nodata = 0;
+    char nocode = 0;
+    char file_format = 0;
 
     char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "ab:cvwrdeim:np:t:h?")) != -1)
+    while ((opt = getopt(argc, argv, "f:xyab:cvwrdeim:np:t:h?")) != -1)
     {
         switch (opt)
         {
+        case 'x':
+            nodata = 1;
+            break;
+        case 'y':
+            nocode = 1;
+            break;
         case 'a':
             erase = 1;
             write = 1;
@@ -96,6 +111,17 @@ int main(int argc, char *argv[])
                 || MODE_MIN_VALUE > mode)
             {
                 fprintf(stderr, "Invalid mode\n");
+                printf("%s", usage);
+                return EINVAL;
+            }
+            break;
+        case 'f':
+            file_format = strtol(optarg, &endp, 10);
+            if (optarg == endp
+                || FILE_FORMAT_MAX_VALUE < mode
+                || FILE_FORMAT_MIN_VALUE > mode)
+            {
+                fprintf(stderr, "Invalid file format\n");
                 printf("%s", usage);
                 return EINVAL;
             }
@@ -243,7 +269,7 @@ int main(int argc, char *argv[])
                        device_name, code_size / 1024, data_size / 1024
                     );
             }
-            if (1 == erase)
+            if (!nocode && (1 == erase))
             {
                 if (1 <= verbose_level)
                 {
@@ -257,7 +283,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (1 == erase && data_size)
+            if (!nodata && (1 == erase && data_size))
             {
                 if (1 <= verbose_level)
                 {
@@ -282,7 +308,14 @@ int main(int argc, char *argv[])
                 {
                     printf("Read file \"%s\"\n", filename);
                 }
-                rc = srec_read(filename, code, code_size, data, data_size);
+                if (FILE_FORMAT_IHEX == file_format)
+                {
+                    rc = ihex_read(filename, code, code_size, data, data_size);
+                }
+                else
+                {
+                    rc = srec_read(filename, code, code_size, data, data_size);
+                }
                 if (0 != rc)
                 {
                     fprintf(stderr, "Read failed\n");
@@ -290,7 +323,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (1 == write)
+            if (!nocode && (1 == write))
             {
                 if (1 <= verbose_level)
                 {
@@ -304,7 +337,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (1 == write && data_size)
+            if (!nodata && (1 == write && data_size))
             {
                 if (1 <= verbose_level)
                 {
@@ -318,7 +351,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (1 == verify)
+            if (!nocode && (1 == verify))
             {
                 if (1 <= verbose_level)
                 {
@@ -332,7 +365,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (1 == verify && data_size)
+            if (!nodata && (1 == verify && data_size))
             {
                 if (1 <= verbose_level)
                 {
