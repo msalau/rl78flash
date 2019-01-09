@@ -41,6 +41,10 @@ const char *usage =
     "\t\t\tn=2 Single-wire UART, Reset by RTS\n"
     "\t\t\tdefault: n=1\n"
     "\t-n\tInvert reset\n"
+    "\t-f n\tSet file format\n"
+    "\t\t\tn=0 S-record\n"
+    "\t\t\tn=1 Intel Hex\n"
+    "\t\t\tdefault: n=0\n"
     "\t-t baud\tStart terminal with specified baudrate\n"
     "\t-v\tVerbose mode\n"
     "\t-h\tDisplay help\n";
@@ -55,6 +59,7 @@ int main(int argc, char *argv[])
     char invert_reset = 0;
     char terminal = 0;
     int terminal_baud = 0;
+    char file_format = 0;
 
     char *endp;
     int opt;
@@ -73,6 +78,17 @@ int main(int argc, char *argv[])
                 || MODE_MAX_VALUE < mode)
             {
                 fprintf(stderr, "Invalid mode\n");
+                printf("%s", usage);
+                return EINVAL;
+            }
+            break;
+        case 'f':
+            file_format = strtol(optarg, &endp, 10);
+            if (optarg == endp
+                || FILE_FORMAT_MAX_VALUE < mode
+                || FILE_FORMAT_MIN_VALUE > mode)
+            {
+                fprintf(stderr, "Invalid file format\n");
                 printf("%s", usage);
                 return EINVAL;
             }
@@ -209,7 +225,14 @@ int main(int argc, char *argv[])
             {
                 printf("Read file \"%s\"\n", filename);
             }
-            rc = srec_read(filename, code, codesize, NULL, 0);
+            if (FILE_FORMAT_IHEX == file_format)
+            {
+                rc = ihex_read(filename, code, codesize, NULL, 0);
+            }
+            else
+            {
+                rc = srec_read(filename, code, codesize, NULL, 0);
+            }
             if (0 != rc)
             {
                 fprintf(stderr, "Read failed\n");

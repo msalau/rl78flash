@@ -164,3 +164,124 @@ int srec_read(const char *filename,
     fclose(pfile);
     return rc;
 }
+
+int ihex_read(const char *filename,
+              void *code, unsigned int code_len,
+              void *data, unsigned int data_len)
+{
+    FILE *pfile;
+    char line[512];
+    int rc = SREC_NO_ERROR;
+    unsigned int extended_address = 0;
+    pfile = fopen(filename, "r");
+    if (NULL == pfile)
+    {
+        fprintf(stderr, "Unable to open file \"%s\"\n", filename);
+        return SREC_IO_ERROR;
+    }
+    rewind(pfile);
+    while (!feof(pfile))
+    {
+        if (NULL == fgets(line, sizeof line, pfile))
+        {
+            if (ferror(pfile))
+            {
+                fprintf(stderr, "Unable to read file \"%s\"\n", filename);
+                rc = SREC_IO_ERROR;
+            }
+            break;
+        }
+        const size_t len = strlen(line);
+        if (0 == len || '\n' != line[len - 1])
+        {
+            fprintf(stderr, "Unable to parse file: line is too long\n");
+            rc = SREC_IO_ERROR;
+        }
+        if (4 <= verbose_level)
+        {
+            printf("ihex: %s\n", line);
+        }
+        if (':' != line[0])
+        {
+            fprintf(stderr, "File format error (\"%s\")\n", line);
+            rc = SREC_FORMAT_ERROR;
+            break;
+        }
+        // Ignore non-data frames
+        const unsigned int record_type = ascii2hex(&line[7], 2);
+        if (0 != record_type
+            && 2 != record_type
+            && 4 != record_type)
+        {
+            if (4 <= verbose_level)
+            {
+                printf("Record with no data (%u)\n", record_type);
+            }
+            continue;
+        }
+        unsigned int address = ascii2hex(&line[3], 4) + extended_address;
+        const int data_length = ascii2hex(&line[1], 2); // in bytes
+        const char *data_p = line + 9;
+        unsigned char *memory;
+
+        if (2 == record_type
+            || 4 == record_type)
+        {
+            extended_address = ascii2hex(&line[9], 4) << ((4 == record_type) ? 16 : 4);
+            if (4 <= verbose_level)
+            {
+                printf("Extended address (%06X)\n", extended_address);
+            }
+            continue;
+        }
+        else if ((CODE_OFFSET + code_len) >= (address + data_length))
+        {
+            if (NULL == code)
+            {
+                continue;
+            }
+            memory = (unsigned char*)code;
+            address -= CODE_OFFSET;
+            if (4 <= verbose_level)
+            {
+                printf("ihex_code (%06X) : ", address);
+            }
+        }
+        else if (DATA_OFFSET <= address
+            && (DATA_OFFSET + data_len) >= (address + data_length))
+        {
+            if (NULL == data)
+            {
+                continue;
+            }
+            memory = (unsigned char*)data;
+            address -= DATA_OFFSET;
+            if (4 <= verbose_level)
+            {
+                printf("ihex_data (%06X) : ", address);
+            }
+        }
+        else
+        {
+            rc = SREC_MEMORY_ERROR;
+            break;
+        }
+        unsigned int i = data_length;
+        for(; 0 < i; --i)
+        {
+            memory[address] = ascii2hex(data_p, 2);
+            if (4 <= verbose_level)
+            {
+                printf("%02X ", memory[address]);
+            }
+            ++address;
+            data_p += 2;
+        }
+        if (4 <= verbose_level)
+        {
+            printf("\n");
+        }
+    }
+    fclose(pfile);
+    return rc;
+}

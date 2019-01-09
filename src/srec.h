@@ -21,10 +21,19 @@
 #define SREC_H__
 
 int srec_read(const char *filename, void *code, unsigned int code_len, void *data, unsigned int data_len);
+int ihex_read(const char *filename, void *code, unsigned int code_len, void *data, unsigned int data_len);
+
 
 #define SREC_NO_ERROR           (0)
 #define SREC_IO_ERROR           (-1)
 #define SREC_FORMAT_ERROR       (-2)
 #define SREC_MEMORY_ERROR       (-3)
+
+#define FILE_FORMAT_SREC        0
+#define FILE_FORMAT_IHEX        1
+
+#define FILE_FORMAT_MIN_VALUE   0
+#define FILE_FORMAT_MAX_VALUE   1
+
 
 #endif // SREC_H__
