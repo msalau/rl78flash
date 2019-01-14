@@ -37,6 +37,8 @@ const char *usage =
     "\t-e\tErase memory\n"
     "\t-w\tWrite memory\n"
     "\t-c\tVerify memory\n"
+    "\t-x\tDisable Data Flash\n"
+    "\t-y\tDisable Code Flash\n"
     "\t-r\tReset MCU (switch to RUN mode)\n"
     "\t-d\tDelay bootloader initialization till keypress\n"
     "\t-b baud\tSet baudrate (supported baudrates: 115200, 250000, 500000, 1000000)\n"
@@ -67,13 +69,21 @@ int main(int argc, char *argv[])
     float voltage = 3.3f;
     char terminal = 0;
     int terminal_baud = 0;
+    char nodata = 0;
+    char nocode = 0;
 
     char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "ab:cvwrdeim:np:t:h?")) != -1)
+    while ((opt = getopt(argc, argv, "xyab:cvwrdeim:np:t:h?")) != -1)
     {
         switch (opt)
         {
+        case 'x':
+            nodata = 1;
+            break;
+        case 'y':
+            nocode = 1;
+            break;
         case 'a':
             erase = 1;
             write = 1;
@@ -243,7 +253,7 @@ int main(int argc, char *argv[])
                        device_name, code_size / 1024, data_size / 1024
                     );
             }
-            if (1 == erase)
+            if (!nocode && (1 == erase))
             {
                 if (1 <= verbose_level)
                 {
@@ -257,7 +267,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (1 == erase && data_size)
+            if (!nodata && (1 == erase && data_size))
             {
                 if (1 <= verbose_level)
                 {
@@ -290,7 +300,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (1 == write)
+            if (!nocode && (1 == write))
             {
                 if (1 <= verbose_level)
                 {
@@ -304,7 +314,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (1 == write && data_size)
+            if (!nodata && (1 == write && data_size))
             {
                 if (1 <= verbose_level)
                 {
@@ -318,7 +328,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (1 == verify)
+            if (!nocode && (1 == verify))
             {
                 if (1 <= verbose_level)
                 {
@@ -332,7 +342,7 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            if (1 == verify && data_size)
+            if (!nodata && (1 == verify && data_size))
             {
                 if (1 <= verbose_level)
                 {
