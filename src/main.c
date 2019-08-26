@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <stdint.h>
 #include "rl78.h"
 #include "serial.h"
 #include "srec.h"
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
     char reset_after = 0;
     char wait = 0;
     char display_info = 0;
-    char mode = 0;
+    int8_t mode = 0;
     char invert_reset = 0;
     int baud = 115200;
     float voltage = 3.3f;
