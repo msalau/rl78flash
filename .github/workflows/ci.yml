@@ -9,11 +9,9 @@ jobs:
         compiler: [gcc, clang]
     steps:
       - uses: actions/checkout@v3
-      - name: Build with ${{ matrix.compiler }}
       - run: CC=${{ matrix.compiler }} make
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Check sources with scan-build
       - run: scan-build -analyze-headers --status-bugs make
