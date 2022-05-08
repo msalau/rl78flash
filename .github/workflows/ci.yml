@@ -7,12 +7,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gcc, clang]
+        include:
+          - compiler: gcc
+            target: all
+          - compiler: clang
+            target: all
+          - compiler: x86_64-w64-mingw32-gcc
+            deb: gcc-mingw-w64-x86-64
+            target: win32
+          - compiler: i686-w64-mingw32-gcc
+            deb: gcc-mingw-w64-i686
+            target: win32
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Install ${{ matrix.deb }}
+        if: ${{ matrix.deb != '' }}
+        run: sudo apt-get install -y ${{ matrix.deb }}
       - name: Build using ${{ matrix.compiler }}
-        run: CC=${{ matrix.compiler }} make
+        run: CC=${{ matrix.compiler }} make ${{ matrix.target }}
   check:
     name: Check
     runs-on: ubuntu-latest
@@ -22,4 +35,4 @@ jobs:
       - name: Install scan-build
         run: sudo apt-get install -y clang-tools
       - name: Check the code
-        run: scan-build -analyze-headers --status-bugs make
+        run: scan-build -analyze-headers --status-bugs make all
