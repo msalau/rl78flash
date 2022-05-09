@@ -25,7 +25,7 @@ jobs:
         if: ${{ matrix.deb != '' }}
         run: sudo apt-get install -y ${{ matrix.deb }}
       - name: Build using ${{ matrix.compiler }}
-        run: CC=${{ matrix.compiler }} make ${{ matrix.target }}
+        run: CC=${{ matrix.compiler }} make -k ${{ matrix.target }}
   macosx:
     name: Build (macosx)
     runs-on: macos-latest
@@ -33,7 +33,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Check the code
-        run: make all
+        run: make -k all
   check:
     name: Check
     runs-on: ubuntu-latest
