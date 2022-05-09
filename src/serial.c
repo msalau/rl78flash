@@ -55,10 +55,12 @@ int serial_open(const char *port)
         options.c_cc[VTIME] = 1;
         tcsetattr(fd, TCSANOW, &options);
         usleep(1000);
-        ioctl(fd, TCFLSH, TCIOFLUSH);
+        tcflush(fd, TCIOFLUSH);
     }
     return fd;
 }
+
+#if !defined(__APPLE__)
 
 typedef struct {
     int baudrate;
@@ -79,8 +81,13 @@ const baudrate_code_t baudrates[] =
     { 0, 0}
 };
 
+#endif  /* !defined(__APPLE__) */
+
 int serial_set_baud(port_handle_t fd, int baud)
 {
+    speed_t speed;
+
+#if !defined(__APPLE__)
     const baudrate_code_t *pbaud = baudrates;
     while (0 != pbaud->baudrate)
     {
@@ -95,10 +102,15 @@ int serial_set_baud(port_handle_t fd, int baud)
         fprintf(stderr, "Failed to set baudrate %u\n", baud);
         return -1;
     }
+    speed = pbaud->code;
+#else  /* !defined(__APPLE__) */
+    speed = baud;
+#endif /* !defined(__APPLE__) */
+
     struct termios options;
     tcgetattr(fd, &options);
-    cfsetispeed(&options, pbaud->code);
-    cfsetospeed(&options, pbaud->code);
+    cfsetispeed(&options, speed);
+    cfsetospeed(&options, speed);
     return tcsetattr(fd, TCSANOW, &options);
 }
 

@@ -27,13 +27,11 @@ jobs:
       - name: Build using ${{ matrix.compiler }}
         run: CC=${{ matrix.compiler }} make -k ${{ matrix.target }}
   macosx:
-    name: Build (macosx)
+    name: Build (macos)
     runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Find termios.h
-        run: find / -name \*termios.h || true
       - name: Check the code
         run: make -k all
   check:
