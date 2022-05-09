@@ -115,11 +115,17 @@ int rl78_send_cmd(port_handle_t fd, int cmd, const void *data, int len)
     {
         return -1;
     }
+    if (!data && len)
+    {
+        return -2;
+    }
+
     unsigned char buf[len + 5];
     buf[0] = SOH;
     buf[1] = (len + 1) & 0xFFU;
     buf[2] = cmd;
-    memcpy(&buf[3], data, len);
+    if (len)
+        memcpy(&buf[3], data, len);
     buf[len + 3] = checksum(&buf[1], len + 2);
     buf[len + 4] = ETX;
     int ret = serial_write(fd, buf, sizeof buf);
