@@ -1,5 +1,5 @@
 CFLAGS := -O2 -Wall -Wextra -Werror
-LDFLAGS := -s
+LDFLAGS :=
 LIBS := -lpthread
 
 PREFIX ?= /usr/local
