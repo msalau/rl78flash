@@ -80,3 +80,37 @@ jobs:
         run: sudo apt-get install -y clang-tools
       - name: Check the code
         run: scan-build -analyze-headers --status-bugs make all
+  codeql:
+    name: Check with CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: gcc
+            target: all
+            name: Linux
+          - compiler: x86_64-w64-mingw32-gcc
+            packages: gcc-mingw-w64-x86-64
+            target: win32
+            name: Windows
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install ${{ matrix.packages }}
+        if: ${{ matrix.packages != '' }}
+        run: sudo apt-get install -y ${{ matrix.packages }}
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: cpp
+      - name: Build using ${{ matrix.compiler }}
+        run: make -k ${{ matrix.target }}
+        env:
+          CC: ${{ matrix.compiler }}
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
