@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include "rl78.h"
 #include "serial.h"
@@ -242,6 +243,7 @@ int main(int argc, char *argv[])
             }
             char device_name[11];
             unsigned int code_size, data_size;
+            bool is_g23;
             rc = rl78_cmd_silicon_signature(fd, device_name, &code_size, &data_size);
             if (0 > rc)
             {
@@ -249,6 +251,7 @@ int main(int argc, char *argv[])
                 retcode = EIO;
                 break;
             }
+            is_g23 = !memcmp(device_name, "R7F", 3);
             if (1 == display_info)
             {
                 printf("Device: %s\n"
@@ -269,7 +272,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Erase code flash\n");
                 }
-                rc = rl78_erase(fd, CODE_OFFSET, code_size);
+                rc = rl78_erase(fd, CODE_OFFSET, code_size, is_g23);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash erase failed\n");
@@ -283,7 +286,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Erase data flash\n");
                 }
-                rc = rl78_erase(fd, DATA_OFFSET, data_size);
+                rc = rl78_erase(fd, DATA_OFFSET, data_size, is_g23);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash erase failed\n");
@@ -326,7 +329,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Write code flash\n");
                 }
-                rc = rl78_program(fd, CODE_OFFSET, code, code_size);
+                rc = rl78_program(fd, CODE_OFFSET, code, code_size, is_g23);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash write failed\n");
@@ -340,7 +343,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Write data flash\n");
                 }
-                rc = rl78_program(fd, DATA_OFFSET, data, data_size);
+                rc = rl78_program(fd, DATA_OFFSET, data, data_size, is_g23);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash write failed\n");
@@ -354,7 +357,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Verify Code flash\n");
                 }
-                rc = rl78_verify(fd, CODE_OFFSET, code, code_size);
+                rc = rl78_verify(fd, CODE_OFFSET, code, code_size, is_g23);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash verification failed\n");
@@ -368,7 +371,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Verify Data flash\n");
                 }
-                rc = rl78_verify(fd, DATA_OFFSET, data, data_size);
+                rc = rl78_verify(fd, DATA_OFFSET, data, data_size, is_g23);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash verification failed\n");

@@ -54,6 +54,7 @@
 #define RL78_BAUD_1000000    0x03
 
 #define FLASH_BLOCK_SIZE        1024
+#define FLASH_BLOCK_SIZE_G23    2048
 #define CODE_OFFSET             (0U)
 #define DATA_OFFSET             (0x000F1000U)
 
@@ -93,11 +94,11 @@ int rl78_cmd_silicon_signature(port_handle_t fd, char device_name[11], unsigned 
 int rl78_cmd_block_erase(port_handle_t fd, unsigned int address);
 int rl78_cmd_block_blank_check(port_handle_t fd, unsigned int address_start, unsigned int address_end);
 int rl78_cmd_checksum(port_handle_t fd, unsigned int address_start, unsigned int address_end);
-int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom);
+int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom, bool is_g23);
 unsigned int rl78_checksum(const void *rom, unsigned int len);
 int rl78_cmd_verify(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom);
-int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size);
-int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size);
-int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size);
+int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, bool is_g23);
+int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, bool is_g23);
+int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, bool is_g23);
 
 #endif  // RL78_H__

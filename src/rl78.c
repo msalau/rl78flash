@@ -17,12 +17,14 @@
  * IN THE SOFTWARE.                                                                                                  *
  *********************************************************************************************************************/
 
-#include "serial.h"
-#include "rl78.h"
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include "wait_kbhit.h"
+
+#include "serial.h"
+#include "rl78.h"
 
 extern int verbose_level;
 static unsigned char communication_mode;
@@ -262,7 +264,7 @@ int rl78_cmd_baud_rate_set(port_handle_t fd, int baud, float voltage)
     int rc = rl78_recv(fd, &data, &len, 3);
     if (RESPONSE_OK != rc)
     {
-        fprintf(stderr, "FAILED\n");
+        fprintf(stderr, "FAILED baud rate set\n");
         return rc;
     }
     if (STATUS_ACK != data[0])
@@ -457,7 +459,7 @@ int rl78_cmd_checksum(port_handle_t fd, unsigned int address_start, unsigned int
     return rc;
 }
 
-int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom)
+int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom, bool is_g23)
 {
     if (3 <= verbose_level)
     {
@@ -472,7 +474,7 @@ int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned 
     int rc = rl78_recv(fd, &data, &len, 1);
     if (RESPONSE_OK != rc)
     {
-        fprintf(stderr, "FAILED\n");
+        fprintf(stderr, "FAILED (no response)\n");
         return rc;
     }
     if (STATUS_ACK != data[0])
@@ -510,7 +512,7 @@ int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned 
         rc = rl78_recv(fd, &data, &len, 2);
         if (RESPONSE_OK != rc)
         {
-            fprintf(stderr, "FAILED\n");
+            fprintf(stderr, "FAILED (bad response for block)\n");
             return rc;
         }
         if (STATUS_ACK != data[0])
@@ -526,16 +528,19 @@ int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned 
     }
     usleep(final_delay);
     // Receive status of completion
-    rc = rl78_recv(fd, &data, &len, 1);
-    if (RESPONSE_OK != rc)
+    if (!is_g23)
     {
-        fprintf(stderr, "FAILED\n");
-        return rc;
+        rc = rl78_recv(fd, &data, &len, 1);
+        if (RESPONSE_OK != rc)
+        {
+            fprintf(stderr, "FAILED (response not ok)\n");
+            return rc;
         }
-    if (STATUS_ACK != data[0])
-    {
-        fprintf(stderr, "ACK not received\n");
-        return data[0];
+        if (STATUS_ACK != data[0])
+        {
+            fprintf(stderr, "ACK not received\n");
+            return data[0];
+        }
     }
     if (3 <= verbose_level)
     {
@@ -645,22 +650,24 @@ int allFFs(const void *mem, unsigned int size)
     return 1;
 }
 
-int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size)
+int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, bool is_g23)
 {
+    unsigned int blksz = is_g23 ? FLASH_BLOCK_SIZE_G23 : FLASH_BLOCK_SIZE;
+
     // Make sure size is aligned to flash block boundary
-    unsigned int i = size & ~(FLASH_BLOCK_SIZE - 1);
+    unsigned int i = size & ~(blksz - 1);
     const unsigned char *mem = (const unsigned char*)data;
     int rc = 0;;
-    for (; i; i -= FLASH_BLOCK_SIZE)
+    for (; i; i -= blksz)
     {
-        if (!allFFs(mem, FLASH_BLOCK_SIZE))
+        if (!allFFs(mem, blksz))
         {
             if (3 <= verbose_level)
             {
                 printf("Program block %06X\n", address);
             }
             // Check if block is ready to program new content
-            rc = rl78_cmd_block_blank_check(fd, address, address + FLASH_BLOCK_SIZE - 1);
+            rc = rl78_cmd_block_blank_check(fd, address, address + blksz - 1);
             if (0 > rc)
             {
                 fprintf(stderr, "Block Blank Check failed (%06X)\n", address);
@@ -677,7 +684,7 @@ int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsig
                 }
             }
             // Write new content
-            rc = rl78_cmd_programming(fd, address, address + FLASH_BLOCK_SIZE - 1, mem);
+            rc = rl78_cmd_programming(fd, address, address + blksz - 1, mem, is_g23);
             if (0 > rc)
             {
                 fprintf(stderr, "Programming failed (%06X)\n", address);
@@ -696,8 +703,8 @@ int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsig
                 printf("No data at block %06X\n", address);
             }
         }
-        mem += FLASH_BLOCK_SIZE;
-        address += FLASH_BLOCK_SIZE;
+        mem += blksz;
+        address += blksz;
     }
     if (2 == verbose_level)
     {
@@ -706,15 +713,17 @@ int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsig
     return rc;
 }
 
-int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size)
+int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, bool is_g23)
 {
+    unsigned int blksz = is_g23 ? FLASH_BLOCK_SIZE_G23 : FLASH_BLOCK_SIZE;
+
     // Make sure size is aligned to flash block boundary
-    unsigned int i = size & ~(FLASH_BLOCK_SIZE - 1);
+    unsigned int i = size & ~(blksz - 1);
     unsigned int address = start_address;
     int rc = 0;
-    for (; i; i -= FLASH_BLOCK_SIZE)
+    for (; i; i -= blksz)
     {
-        rc = rl78_cmd_block_blank_check(fd, address, address + FLASH_BLOCK_SIZE - 1);
+        rc = rl78_cmd_block_blank_check(fd, address, address + blksz - 1);
         if (0 > rc)
         {
             fprintf(stderr, "Block Blank Check failed (%06X)\n", address);
@@ -744,7 +753,7 @@ int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size)
                 fflush(stdout);
             }
         }
-        address += FLASH_BLOCK_SIZE;
+        address += blksz;
     }
     if (2 == verbose_level)
     {
@@ -753,22 +762,24 @@ int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size)
     return rc;
 }
 
-int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size)
+int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, bool is_g23)
 {
+    unsigned int blksz = is_g23 ? FLASH_BLOCK_SIZE_G23 : FLASH_BLOCK_SIZE;
+
     // Make sure size is aligned to flash block boundary
-    unsigned int i = size & ~(FLASH_BLOCK_SIZE - 1);
+    unsigned int i = size & ~(blksz - 1);
     const unsigned char *mem = (const unsigned char*)data;
     int rc = 0;
-    for (; i; i -= FLASH_BLOCK_SIZE)
+    for (; i; i -= blksz)
     {
         if (3 <= verbose_level)
         {
             printf("Verify block %06X\n", address);
         }
-        if (allFFs(mem, FLASH_BLOCK_SIZE))
+        if (allFFs(mem, blksz))
         {
             // Check if block is blank
-            rc = rl78_cmd_block_blank_check(fd, address, address + FLASH_BLOCK_SIZE - 1);
+            rc = rl78_cmd_block_blank_check(fd, address, address + blksz - 1);
             if (0 > rc)
             {
                 fprintf(stderr, "Block Blank Check failed (%06X)\n", address);
@@ -788,7 +799,7 @@ int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsign
         else
         {
             // If block is not blank
-            rc = rl78_cmd_verify(fd, address, address + FLASH_BLOCK_SIZE - 1, mem);
+            rc = rl78_cmd_verify(fd, address, address + blksz - 1, mem);
             if (0 != rc)
             {
                 fprintf(stderr, "Block content does not match (%06X)\n", address);
@@ -800,8 +811,8 @@ int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsign
                 fflush(stdout);
             }
         }
-        mem += FLASH_BLOCK_SIZE;
-        address += FLASH_BLOCK_SIZE;
+        mem += blksz;
+        address += blksz;
     }
     if (2 == verbose_level)
     {
