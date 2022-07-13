@@ -1,0 +1,116 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: gcc
+            target: deb tar.gz
+            name: Linux (deb + tar.gz)
+          - compiler: clang
+            target: all
+          - compiler: x86_64-w64-mingw32-gcc
+            packages: gcc-mingw-w64-x86-64
+            target: zip
+            suffix: win64
+            name: Win64
+          - compiler: i686-w64-mingw32-gcc
+            packages: gcc-mingw-w64-i686
+            target: zip
+            suffix: win32
+            name: Win32
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install ${{ matrix.packages }}
+        if: ${{ matrix.packages != '' }}
+        run: sudo apt-get install -y ${{ matrix.packages }}
+      - name: Build using ${{ matrix.compiler }}
+        run: make -k ${{ matrix.target }}
+        env:
+          SUFFIX: ${{ matrix.suffix }}
+          CC: ${{ matrix.compiler }}
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v3
+        if: ${{ matrix.target != 'all' }}
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            *.zip
+            *.deb
+            *.tar.gz
+          if-no-files-found: error
+
+  macos:
+    name: Build (macos)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Build
+        run: make -k tar.gz
+        env:
+          SUFFIX: macos
+          TAR: gtar
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: MacOS
+          path: |
+            *.tar.gz
+          if-no-files-found: error
+
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install scan-build
+        run: sudo apt-get install -y clang-tools
+      - name: Check the code
+        run: scan-build -analyze-headers --status-bugs make all
+  codeql:
+    name: Check with CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: gcc
+            target: all
+            name: Linux
+          - compiler: x86_64-w64-mingw32-gcc
+            packages: gcc-mingw-w64-x86-64
+            target: win32
+            name: Windows
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install ${{ matrix.packages }}
+        if: ${{ matrix.packages != '' }}
+        run: sudo apt-get install -y ${{ matrix.packages }}
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: cpp
+      - name: Build using ${{ matrix.compiler }}
+        run: make -k ${{ matrix.target }}
+        env:
+          CC: ${{ matrix.compiler }}
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2

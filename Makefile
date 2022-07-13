@@ -1,5 +1,5 @@
 CFLAGS := -O2 -Wall -Wextra -Werror
-LDFLAGS := -s
+LDFLAGS :=
 LIBS := -lpthread
 
 PREFIX ?= /usr/local
@@ -28,51 +28,60 @@ rl78g10flash.exe: $(OBJS_G10) $(OBJS_WIN32)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 clean:
-	-rm -f rl78flash rl78flash.exe rl78g10flash rl78g10flash.exe src/*.o src/*~ *~
+	-rm -f rl78flash rl78flash.exe rl78g10flash rl78g10flash.exe src/*.o src/*~ *~ *.deb *.zip *.tar.gz ./rl78flash-* ./rl78flash_*
 
 install: rl78flash rl78g10flash
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	install -m 755 -t $(DESTDIR)$(PREFIX)/bin $^
 
-ifeq ($(MAKECMDGOALS),zip)
+ifneq ($(MAKECMDGOALS),clean)
 
-IS_x86_64 := $(shell $(CC) -dumpmachine | grep x86_64)
-ARCH := $(if $(IS_x86_64),win64,win32)
-VERSION := $(shell git describe --tags)
-NAME := rl78flash-$(VERSION:v%=%)-$(ARCH)
-
-zip: $(NAME).zip
-
-$(NAME).zip: rl78flash.exe rl78g10flash.exe README.md
-	mkdir -p ./$(NAME)
-	cp $^ ./$(NAME)
-	zip $@ ./$(NAME)/*
-	rm -rf ./$(NAME)
-
-endif
-
-ifeq ($(MAKECMDGOALS),deb)
-
-IS_x86_64 := $(shell $(CC) -dumpmachine | grep x86_64)
-ARCH := $(if $(IS_x86_64),amd64,i386)
+TAR ?= tar
 TAG := $(shell git describe --tags)
 VERSION := $(TAG:v%=%)
-NAME := rl78flash_$(VERSION)_$(ARCH)
+IS_x86_64 := $(shell $(CC) -dumpmachine | grep x86_64)
+ARCH := $(if $(IS_x86_64),amd64,i386)
 
-deb: $(NAME).deb
+ifeq ($(SUFFIX),)
+SUFFIX := $(ARCH)
+endif
 
-$(NAME)/DEBIAN:
+ZIP_NAME ?= rl78flash-$(VERSION)-$(SUFFIX)
+TARGZ_NAME ?= rl78flash-$(VERSION)-$(SUFFIX)
+DEB_NAME := rl78flash_$(VERSION)_$(ARCH)
+
+zip: $(ZIP_NAME).zip
+
+$(ZIP_NAME).zip: rl78flash.exe rl78g10flash.exe README.md
+	rm -rf ./$(ZIP_NAME) $@
+	mkdir -p ./$(ZIP_NAME)
+	cp $^ ./$(ZIP_NAME)
+	zip $@ ./$(ZIP_NAME)/*
+	rm -rf ./$(ZIP_NAME)
+
+tar.gz: $(TARGZ_NAME).tar.gz
+
+$(TARGZ_NAME).tar.gz: rl78flash rl78g10flash README.md
+	rm -rf ./$(TARGZ_NAME) $@
+	mkdir -p ./$(TARGZ_NAME)
+	cp $^ ./$(TARGZ_NAME)
+	$(TAR) --owner=root --group=root -caf $@ ./$(TARGZ_NAME)/*
+	rm -rf ./$(TARGZ_NAME)
+
+deb: $(DEB_NAME).deb
+
+$(DEB_NAME)/DEBIAN:
 	mkdir -p $@
 
-$(NAME)/DEBIAN/control: rl78flash.control.in | $(NAME)/DEBIAN
+$(DEB_NAME)/DEBIAN/control: rl78flash.control.in | $(DEB_NAME)/DEBIAN
 	cat $< | \
 		sed -e "s|@VERSION@|$(VERSION)|" | \
 		sed -e "s|@ARCH@|$(ARCH)|" > $@
 
-$(NAME).deb: rl78flash rl78g10flash $(NAME)/DEBIAN/control
-	mkdir -p $(NAME)/usr/bin
-	cp rl78flash rl78g10flash $(NAME)/usr/bin
-	fakeroot dpkg-deb --build $(NAME)
-	rm -rf $(NAME)
+$(DEB_NAME).deb: rl78flash rl78g10flash $(DEB_NAME)/DEBIAN/control
+	mkdir -p $(DEB_NAME)/usr/bin
+	cp rl78flash rl78g10flash $(DEB_NAME)/usr/bin
+	fakeroot dpkg-deb --build $(DEB_NAME)
+	rm -rf $(DEB_NAME)
 
 endif

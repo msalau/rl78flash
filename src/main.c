@@ -216,6 +216,9 @@ int main(int argc, char *argv[])
     }
 
     int retcode = 0;
+    unsigned char *code = NULL;
+    unsigned char *data = NULL;
+
     do
     {
         if (1 == write
@@ -254,6 +257,12 @@ int main(int argc, char *argv[])
                        device_name, code_size / 1024, data_size / 1024
                     );
             }
+            if (!code_size)
+            {
+                fprintf(stderr, "Invalid code size: %u\n", code_size);
+                retcode = EINVAL;
+                break;
+            }
             if (!nocode && (1 == erase))
             {
                 if (1 <= verbose_level)
@@ -282,13 +291,23 @@ int main(int argc, char *argv[])
                     break;
                 }
             }
-            unsigned char code[code_size];
-            unsigned char data[data_size];
+
+            code = malloc(code_size);
+            if (data_size)
+                data = malloc(data_size);
+
+            if (!code || (!data && data_size))
+            {
+                fprintf(stderr, "Memory allocation failed\n");
+                retcode = ENOMEM;
+                break;
+            }
             if (1 == write
                 || 1 == verify)
             {
-                memset(code, 0xFF, sizeof code);
-                memset(data, 0xFF, sizeof data);
+                memset(code, 0xFF, code_size);
+                if (data)
+                    memset(data, 0xFF, data_size);
                 if (1 <= verbose_level)
                 {
                     printf("Read file \"%s\"\n", filename);
@@ -378,6 +397,12 @@ int main(int argc, char *argv[])
         }
     }
     while (0);
+
+    if (code)
+        free(code);
+    if (data)
+        free(data);
+
     serial_close(fd);
     printf("\n");
     return retcode;

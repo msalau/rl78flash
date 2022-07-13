@@ -43,7 +43,7 @@ static void * receiver_func(void * pfd)
             {
                 struct timeval tv;
                 gettimeofday(&tv, NULL);
-                printf("[%ld.%ld] ", tv.tv_sec, tv.tv_usec);
+                printf("[%ld.%ld] ", (long int)tv.tv_sec, (long int)tv.tv_usec);
             }
             putchar(c);
             fflush(stdout);
