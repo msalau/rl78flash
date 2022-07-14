@@ -53,8 +53,8 @@
 #define RL78_BAUD_500000     0x02
 #define RL78_BAUD_1000000    0x03
 
-#define FLASH_BLOCK_SIZE        1024
-#define FLASH_BLOCK_SIZE_G23    2048
+#define FLASH_BLOCK_SIZE_G1X    1024
+#define FLASH_BLOCK_SIZE_G2X    2048
 #define CODE_OFFSET             (0U)
 #define DATA_OFFSET             (0x000F1000U)
 
@@ -81,6 +81,11 @@
 #define MODE_MIN_VALUE    0
 #define MODE_INVERT_RESET 0x80
 
+#define PROTOCOL_VERSION_A 0 /* most RL78 chips */
+/* Protocol B = ??? Is this the G10 protocol? */
+#define PROTOCOL_VERSION_C 2 /* RL78/G23 */
+#define PROTOCOL_VERSION_D 3 /* RL78/F24 */
+
 #include "serial.h"
 
 int rl78_reset_init(port_handle_t fd, int wait, int baud, int mode, float voltage);
@@ -94,11 +99,11 @@ int rl78_cmd_silicon_signature(port_handle_t fd, char device_name[11], unsigned 
 int rl78_cmd_block_erase(port_handle_t fd, unsigned int address);
 int rl78_cmd_block_blank_check(port_handle_t fd, unsigned int address_start, unsigned int address_end);
 int rl78_cmd_checksum(port_handle_t fd, unsigned int address_start, unsigned int address_end);
-int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom, bool is_g23);
+int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom, int proto_ver);
 unsigned int rl78_checksum(const void *rom, unsigned int len);
 int rl78_cmd_verify(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom);
-int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, bool is_g23);
-int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, bool is_g23);
-int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, bool is_g23);
+int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int proto_ver);
+int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, int proto_ver);
+int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int proto_ver);
 
 #endif  // RL78_H__

@@ -19,7 +19,6 @@
 
 #include <unistd.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include "wait_kbhit.h"
 
@@ -459,7 +458,7 @@ int rl78_cmd_checksum(port_handle_t fd, unsigned int address_start, unsigned int
     return rc;
 }
 
-int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom, bool is_g23)
+int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom, int proto_ver)
 {
     if (3 <= verbose_level)
     {
@@ -528,8 +527,8 @@ int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned 
     }
     usleep(final_delay);
     // Receive status of completion
-    if (!is_g23)
-    {
+    if (proto_ver != PROTOCOL_VERSION_C)
+    { /* Protocol A and D require this packet, C doesn't send it */
         rc = rl78_recv(fd, &data, &len, 1);
         if (RESPONSE_OK != rc)
         {
@@ -650,9 +649,9 @@ int allFFs(const void *mem, unsigned int size)
     return 1;
 }
 
-int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, bool is_g23)
+int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int proto_ver)
 {
-    unsigned int blksz = is_g23 ? FLASH_BLOCK_SIZE_G23 : FLASH_BLOCK_SIZE;
+    unsigned int blksz = (proto_ver >= PROTOCOL_VERSION_C) ? FLASH_BLOCK_SIZE_G2X : FLASH_BLOCK_SIZE_G1X;
 
     // Make sure size is aligned to flash block boundary
     unsigned int i = size & ~(blksz - 1);
@@ -684,7 +683,7 @@ int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsig
                 }
             }
             // Write new content
-            rc = rl78_cmd_programming(fd, address, address + blksz - 1, mem, is_g23);
+            rc = rl78_cmd_programming(fd, address, address + blksz - 1, mem, proto_ver);
             if (0 > rc)
             {
                 fprintf(stderr, "Programming failed (%06X)\n", address);
@@ -713,9 +712,9 @@ int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsig
     return rc;
 }
 
-int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, bool is_g23)
+int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, int proto_ver)
 {
-    unsigned int blksz = is_g23 ? FLASH_BLOCK_SIZE_G23 : FLASH_BLOCK_SIZE;
+    unsigned int blksz = (proto_ver >= PROTOCOL_VERSION_C) ? FLASH_BLOCK_SIZE_G2X : FLASH_BLOCK_SIZE_G1X;
 
     // Make sure size is aligned to flash block boundary
     unsigned int i = size & ~(blksz - 1);
@@ -762,9 +761,9 @@ int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, 
     return rc;
 }
 
-int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, bool is_g23)
+int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int proto_ver)
 {
-    unsigned int blksz = is_g23 ? FLASH_BLOCK_SIZE_G23 : FLASH_BLOCK_SIZE;
+    unsigned int blksz = (proto_ver >= PROTOCOL_VERSION_C) ? FLASH_BLOCK_SIZE_G2X : FLASH_BLOCK_SIZE_G1X;
 
     // Make sure size is aligned to flash block boundary
     unsigned int i = size & ~(blksz - 1);
