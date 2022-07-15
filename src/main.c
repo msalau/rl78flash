@@ -23,6 +23,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
+#include <assert.h>
 #include "rl78.h"
 #include "serial.h"
 #include "srec.h"
@@ -295,6 +296,14 @@ int main(int argc, char *argv[])
                     retcode = EINVAL;
                     break;
                 }
+            }
+            if (0 == block_size_table[proto_ver])
+            {
+                fprintf(stderr, "Error: invalid protocol version ID %d, I don't "
+                        "know what flash block size corresponds to this version!\n",
+                        proto_ver);
+                retcode = EINVAL;
+                break;
             }
             if (1 == display_info)
             {

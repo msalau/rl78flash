@@ -53,8 +53,6 @@
 #define RL78_BAUD_500000     0x02
 #define RL78_BAUD_1000000    0x03
 
-#define FLASH_BLOCK_SIZE_G1X    1024
-#define FLASH_BLOCK_SIZE_G2X    2048
 #define CODE_OFFSET             (0U)
 #define DATA_OFFSET             (0x000F1000U)
 
@@ -87,6 +85,8 @@
 #define PROTOCOL_VERSION_D 3 /* RL78/F24 */
 
 #include "serial.h"
+
+extern const unsigned int block_size_table[];
 
 int rl78_reset_init(port_handle_t fd, int wait, int baud, int mode, float voltage);
 int rl78_reset(port_handle_t fd, int mode);

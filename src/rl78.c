@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include "wait_kbhit.h"
 
 #include "serial.h"
@@ -27,6 +28,13 @@
 
 extern int verbose_level;
 static unsigned char communication_mode;
+
+const unsigned int block_size_table[] = {
+    [PROTOCOL_VERSION_A] = 1024,
+    [PROTOCOL_VERSION_C] = 2048,
+    [PROTOCOL_VERSION_D] = 2048,
+};
+
 
 static void rl78_set_reset(port_handle_t fd, int mode, int value)
 {
@@ -651,7 +659,8 @@ int allFFs(const void *mem, unsigned int size)
 
 int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int proto_ver)
 {
-    unsigned int blksz = (proto_ver >= PROTOCOL_VERSION_C) ? FLASH_BLOCK_SIZE_G2X : FLASH_BLOCK_SIZE_G1X;
+    unsigned int blksz = block_size_table[proto_ver];
+    assert(blksz); /* shouldn't happen due to guards in main.c */
 
     // Make sure size is aligned to flash block boundary
     unsigned int i = size & ~(blksz - 1);
@@ -714,7 +723,8 @@ int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsig
 
 int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, int proto_ver)
 {
-    unsigned int blksz = (proto_ver >= PROTOCOL_VERSION_C) ? FLASH_BLOCK_SIZE_G2X : FLASH_BLOCK_SIZE_G1X;
+    unsigned int blksz = block_size_table[proto_ver];
+    assert(blksz); /* shouldn't happen due to guards in main.c */
 
     // Make sure size is aligned to flash block boundary
     unsigned int i = size & ~(blksz - 1);
@@ -763,7 +773,8 @@ int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, 
 
 int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int proto_ver)
 {
-    unsigned int blksz = (proto_ver >= PROTOCOL_VERSION_C) ? FLASH_BLOCK_SIZE_G2X : FLASH_BLOCK_SIZE_G1X;
+    unsigned int blksz = block_size_table[proto_ver];
+    assert(blksz); /* shouldn't happen due to guards in main.c */
 
     // Make sure size is aligned to flash block boundary
     unsigned int i = size & ~(blksz - 1);
