@@ -23,6 +23,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
+#include <assert.h>
 #include "rl78.h"
 #include "serial.h"
 #include "srec.h"
@@ -50,6 +51,12 @@ const char *usage =
     "\t\t\tn=3 Single-wire UART, Reset by RTS\n"
     "\t\t\tn=4 Two-wire UART, Reset by RTS\n"
     "\t\t\tdefault: n=1\n"
+    "\t-P n\tSet protocol version\n"
+    "\t\t\tn=-1 Try to autodetect the protocol version from the unit's Silicon Signature\n"
+    "\t\t\tn=0 Protocol A, for most RL78 units\n"
+    "\t\t\tn=2 Protocol C, for RL78/G23 units\n"
+    "\t\t\tn=3 Protocol D, for RL78/F24 units\n"
+    "\t\t\tdefault: n=-1\n"
     "\t-n\tInvert reset\n"
     "\t-p v\tSpecify power supply voltage\n"
     "\t\t\tdefault: 3.3\n"
@@ -72,10 +79,11 @@ int main(int argc, char *argv[])
     int terminal_baud = 0;
     char nodata = 0;
     char nocode = 0;
+    int proto_ver = -1;
 
     char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "xyab:cvwrdeim:np:t:h?")) != -1)
+    while ((opt = getopt(argc, argv, "xyab:cvwrdeim:np:P:t:h?")) != -1)
     {
         switch (opt)
         {
@@ -133,6 +141,19 @@ int main(int argc, char *argv[])
             {
                 fprintf(stderr, "Operating voltage is out of range. Operating voltage must be in range %1.1fV..%1.1fV.\n",
                         RL78_MIN_VOLTAGE, RL78_MAX_VOLTAGE);
+                return EINVAL;
+            }
+            break;
+        case 'P':
+            if (1 != sscanf(optarg, "%d", &proto_ver))
+            {
+                fprintf(stderr, "Invalid protocol version ID value: %s\n", optarg);
+                printf("%s", usage);
+                return EINVAL;
+            }
+            if (1 == proto_ver || PROTOCOL_VERSION_A > proto_ver || PROTOCOL_VERSION_D < proto_ver)
+            {
+                fprintf(stderr, "Protocol version ID is out of range. See the output of `-h' for the list of allowed values.\n");
                 return EINVAL;
             }
             break;
@@ -249,6 +270,41 @@ int main(int argc, char *argv[])
                 retcode = EIO;
                 break;
             }
+            if (-1 == proto_ver)
+            {
+                if (!memcmp(device_name, "R7F", 3))
+                {
+                    /* NOTE: this isn't too precise, that's why a separate
+                     * optional flag for overriding is provided */
+                    if (device_name[4] == '2') /* RL78/F24: eg. R7F124 */
+                    {
+                        proto_ver = PROTOCOL_VERSION_D;
+                    }
+                    else /* RL78/G23: eg. R7F100 */
+                    {
+                        proto_ver = PROTOCOL_VERSION_C;
+                    }
+                }
+                else if (!memcmp(device_name, "R5F", 3))
+                {
+                    proto_ver = PROTOCOL_VERSION_A;
+                }
+                else
+                {
+                    fprintf(stderr, "Error: unknown device name '%s', please set "
+                            "the protocol version manually.\n", device_name);
+                    retcode = EINVAL;
+                    break;
+                }
+            }
+            if (0 == block_size_table[proto_ver])
+            {
+                fprintf(stderr, "Error: invalid protocol version ID %d, I don't "
+                        "know what flash block size corresponds to this version!\n",
+                        proto_ver);
+                retcode = EINVAL;
+                break;
+            }
             if (1 == display_info)
             {
                 printf("Device: %s\n"
@@ -269,7 +325,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Erase code flash\n");
                 }
-                rc = rl78_erase(fd, CODE_OFFSET, code_size);
+                rc = rl78_erase(fd, CODE_OFFSET, code_size, proto_ver);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash erase failed\n");
@@ -283,7 +339,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Erase data flash\n");
                 }
-                rc = rl78_erase(fd, DATA_OFFSET, data_size);
+                rc = rl78_erase(fd, DATA_OFFSET, data_size, proto_ver);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash erase failed\n");
@@ -326,7 +382,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Write code flash\n");
                 }
-                rc = rl78_program(fd, CODE_OFFSET, code, code_size);
+                rc = rl78_program(fd, CODE_OFFSET, code, code_size, proto_ver);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash write failed\n");
@@ -340,7 +396,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Write data flash\n");
                 }
-                rc = rl78_program(fd, DATA_OFFSET, data, data_size);
+                rc = rl78_program(fd, DATA_OFFSET, data, data_size, proto_ver);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash write failed\n");
@@ -354,7 +410,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Verify Code flash\n");
                 }
-                rc = rl78_verify(fd, CODE_OFFSET, code, code_size);
+                rc = rl78_verify(fd, CODE_OFFSET, code, code_size, proto_ver);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash verification failed\n");
@@ -368,7 +424,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Verify Data flash\n");
                 }
-                rc = rl78_verify(fd, DATA_OFFSET, data, data_size);
+                rc = rl78_verify(fd, DATA_OFFSET, data, data_size, proto_ver);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash verification failed\n");
