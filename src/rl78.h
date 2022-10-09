@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012-2016 Maksim Salau                                                                              *
+ * Copyright (c) 2012-2016, 2022 Maksim Salau                                                                        *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -86,8 +86,6 @@
 
 #include "serial.h"
 
-extern const unsigned int block_size_table[];
-
 int rl78_reset_init(port_handle_t fd, int wait, int baud, int mode, float voltage);
 int rl78_reset(port_handle_t fd, int mode);
 int rl78_send_cmd(port_handle_t fd, int cmd, const void *data, int len);
@@ -102,8 +100,8 @@ int rl78_cmd_checksum(port_handle_t fd, unsigned int address_start, unsigned int
 int rl78_cmd_programming(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom, int proto_ver);
 unsigned int rl78_checksum(const void *rom, unsigned int len);
 int rl78_cmd_verify(port_handle_t fd, unsigned int address_start, unsigned int address_end, const void *rom);
-int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int proto_ver);
-int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, int proto_ver);
-int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int proto_ver);
+int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, unsigned blksz, int proto_ver);
+int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, unsigned blksz);
+int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int blksz);
 
 #endif  // RL78_H__

@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012-2016 Maksim Salau                                                                              *
+ * Copyright (c) 2012-2016, 2022 Maksim Salau                                                                        *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -20,7 +20,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
 #include "wait_kbhit.h"
 
 #include "serial.h"
@@ -28,13 +27,6 @@
 
 extern int verbose_level;
 static unsigned char communication_mode;
-
-const unsigned int block_size_table[] = {
-    [PROTOCOL_VERSION_A] = 1024,
-    [PROTOCOL_VERSION_C] = 2048,
-    [PROTOCOL_VERSION_D] = 2048,
-};
-
 
 static void rl78_set_reset(port_handle_t fd, int mode, int value)
 {
@@ -657,11 +649,8 @@ int allFFs(const void *mem, unsigned int size)
     return 1;
 }
 
-int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int proto_ver)
+int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsigned int size, unsigned blksz, int proto_ver)
 {
-    unsigned int blksz = block_size_table[proto_ver];
-    assert(blksz); /* shouldn't happen due to guards in main.c */
-
     // Make sure size is aligned to flash block boundary
     unsigned int i = size & ~(blksz - 1);
     const unsigned char *mem = (const unsigned char*)data;
@@ -721,11 +710,8 @@ int rl78_program(port_handle_t fd, unsigned int address, const void *data, unsig
     return rc;
 }
 
-int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, int proto_ver)
+int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, unsigned blksz)
 {
-    unsigned int blksz = block_size_table[proto_ver];
-    assert(blksz); /* shouldn't happen due to guards in main.c */
-
     // Make sure size is aligned to flash block boundary
     unsigned int i = size & ~(blksz - 1);
     unsigned int address = start_address;
@@ -771,11 +757,8 @@ int rl78_erase(port_handle_t fd, unsigned int start_address, unsigned int size, 
     return rc;
 }
 
-int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int proto_ver)
+int rl78_verify(port_handle_t fd, unsigned int address, const void *data, unsigned int size, int blksz)
 {
-    unsigned int blksz = block_size_table[proto_ver];
-    assert(blksz); /* shouldn't happen due to guards in main.c */
-
     // Make sure size is aligned to flash block boundary
     unsigned int i = size & ~(blksz - 1);
     const unsigned char *mem = (const unsigned char*)data;
