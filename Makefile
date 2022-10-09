@@ -1,4 +1,5 @@
 CFLAGS := -O2 -Wall -Wextra -Werror
+CPPFLAGS = -MMD -MP -MF ${@:.o=.d}
 LDFLAGS :=
 LIBS := -lpthread
 
@@ -8,6 +9,7 @@ OBJS := src/rl78.o src/main.o src/srec.o src/wait_kbhit.o
 OBJS_G10 := src/rl78g10.o src/main_g10.o src/srec.o src/crc16_ccit.o src/wait_kbhit.o
 OBJS_LINUX := src/terminal.o src/serial.o
 OBJS_WIN32 := src/terminal_win32.o src/serial_win32.o
+DEPS := $(patsubst %.o,%.d,$(OBJS) $(OBJS_G10) $(OBJS_LINUX) $(OBJS_WIN32))
 
 .PHONY: all win32 clean install zip deb
 
@@ -28,7 +30,7 @@ rl78g10flash.exe: $(OBJS_G10) $(OBJS_WIN32)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 clean:
-	-rm -f rl78flash rl78flash.exe rl78g10flash rl78g10flash.exe src/*.o src/*~ *~ *.deb *.zip *.tar.gz ./rl78flash-* ./rl78flash_*
+	-rm -f rl78flash rl78flash.exe rl78g10flash rl78g10flash.exe src/*.o src/*~ src/*.d *~ *.deb *.zip *.tar.gz ./rl78flash-* ./rl78flash_*
 
 install: rl78flash rl78g10flash
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
@@ -85,3 +87,5 @@ $(DEB_NAME).deb: rl78flash rl78g10flash $(DEB_NAME)/DEBIAN/control
 	rm -rf $(DEB_NAME)
 
 endif
+
+-include $(DEPS)
