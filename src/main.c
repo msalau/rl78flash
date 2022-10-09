@@ -1,6 +1,6 @@
 /*********************************************************************************************************************
  * The MIT License (MIT)                                                                                             *
- * Copyright (c) 2012-2016 Maksim Salau                                                                              *
+ * Copyright (c) 2012-2016, 2022  Maksim Salau                                                                       *
  *                                                                                                                   *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      *
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation   *
@@ -23,8 +23,8 @@
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
-#include <assert.h>
 #include "rl78.h"
+#include "rl78-devinfo.h"
 #include "serial.h"
 #include "srec.h"
 #include "terminal.h"
@@ -57,6 +57,8 @@ const char *usage =
     "\t\t\tn=2 Protocol C, for RL78/G23 units\n"
     "\t\t\tn=3 Protocol D, for RL78/F24 units\n"
     "\t\t\tdefault: n=-1\n"
+    "\t-C blk\tCode block size in bytes (default: 0 - autodetect)\n"
+    "\t-D blk\tData block size in bytes (default: 0 - autodetect)\n"
     "\t-n\tInvert reset\n"
     "\t-p v\tSpecify power supply voltage\n"
     "\t\t\tdefault: 3.3\n"
@@ -80,10 +82,12 @@ int main(int argc, char *argv[])
     char nodata = 0;
     char nocode = 0;
     int proto_ver = -1;
+    unsigned code_block_size = 0;
+    unsigned data_block_size = 0;
 
     char *endp;
     int opt;
-    while ((opt = getopt(argc, argv, "xyab:cvwrdeim:np:P:t:h?")) != -1)
+    while ((opt = getopt(argc, argv, "xyab:cvwrdeim:np:P:C:D:t:h?")) != -1)
     {
         switch (opt)
         {
@@ -154,6 +158,22 @@ int main(int argc, char *argv[])
             if (1 == proto_ver || PROTOCOL_VERSION_A > proto_ver || PROTOCOL_VERSION_D < proto_ver)
             {
                 fprintf(stderr, "Protocol version ID is out of range. See the output of `-h' for the list of allowed values.\n");
+                return EINVAL;
+            }
+            break;
+        case 'C':
+            /* Code block size */
+            if (1 != sscanf(optarg, "%u", &code_block_size))
+            {
+                fprintf(stderr, "Invalid code block size: %s\n", optarg);
+                return EINVAL;
+            }
+            break;
+        case 'D':
+            /* Data block size */
+            if (1 != sscanf(optarg, "%u", &data_block_size))
+            {
+                fprintf(stderr, "Invalid data block size: %s\n", optarg);
                 return EINVAL;
             }
             break;
@@ -270,41 +290,6 @@ int main(int argc, char *argv[])
                 retcode = EIO;
                 break;
             }
-            if (-1 == proto_ver)
-            {
-                if (!memcmp(device_name, "R7F", 3))
-                {
-                    /* NOTE: this isn't too precise, that's why a separate
-                     * optional flag for overriding is provided */
-                    if (device_name[4] == '2') /* RL78/F24: eg. R7F124 */
-                    {
-                        proto_ver = PROTOCOL_VERSION_D;
-                    }
-                    else /* RL78/G23: eg. R7F100 */
-                    {
-                        proto_ver = PROTOCOL_VERSION_C;
-                    }
-                }
-                else if (!memcmp(device_name, "R5F", 3))
-                {
-                    proto_ver = PROTOCOL_VERSION_A;
-                }
-                else
-                {
-                    fprintf(stderr, "Error: unknown device name '%s', please set "
-                            "the protocol version manually.\n", device_name);
-                    retcode = EINVAL;
-                    break;
-                }
-            }
-            if (0 == block_size_table[proto_ver])
-            {
-                fprintf(stderr, "Error: invalid protocol version ID %d, I don't "
-                        "know what flash block size corresponds to this version!\n",
-                        proto_ver);
-                retcode = EINVAL;
-                break;
-            }
             if (1 == display_info)
             {
                 printf("Device: %s\n"
@@ -319,13 +304,45 @@ int main(int argc, char *argv[])
                 retcode = EINVAL;
                 break;
             }
+            /* Find device info */
+            const device_info_t *pinfo = rl78_devices;
+            while (pinfo->id)
+            {
+                if (!strncmp(pinfo->id, device_name, strlen(pinfo->id)))
+                    break;
+                pinfo++;
+            }
+            /* Apply autodetected values, if not defined explicitly */
+            if (pinfo->id)
+            {
+                if (proto_ver == -1)
+                    proto_ver = pinfo->protocol;
+                if (!code_block_size)
+                    code_block_size = pinfo->code_block_size;
+                if (!data_block_size)
+                    data_block_size = pinfo->data_block_size;
+            }
+            /* Verify config */
+            if (proto_ver < 0 || !code_block_size || !data_block_size)
+            {
+                fprintf(stderr, "Invalid protocol: protocol=%d, code_block=%u, data_block=%u\n",
+                        proto_ver, code_block_size, data_block_size);
+                retcode = EINVAL;
+                break;
+            }
+            /* The target device is fully defined. */
+            if (1 <= verbose_level)
+            {
+                printf("Protocol configuration: protocol=%d, code_block=%u, data_block=%u\n",
+                        proto_ver, code_block_size, data_block_size);
+            }
             if (!nocode && (1 == erase))
             {
                 if (1 <= verbose_level)
                 {
                     printf("Erase code flash\n");
                 }
-                rc = rl78_erase(fd, CODE_OFFSET, code_size, proto_ver);
+                rc = rl78_erase(fd, CODE_OFFSET, code_size, code_block_size);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash erase failed\n");
@@ -339,7 +356,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Erase data flash\n");
                 }
-                rc = rl78_erase(fd, DATA_OFFSET, data_size, proto_ver);
+                rc = rl78_erase(fd, DATA_OFFSET, data_size, data_block_size);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash erase failed\n");
@@ -382,7 +399,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Write code flash\n");
                 }
-                rc = rl78_program(fd, CODE_OFFSET, code, code_size, proto_ver);
+                rc = rl78_program(fd, CODE_OFFSET, code, code_size, code_block_size, proto_ver);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash write failed\n");
@@ -396,7 +413,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Write data flash\n");
                 }
-                rc = rl78_program(fd, DATA_OFFSET, data, data_size, proto_ver);
+                rc = rl78_program(fd, DATA_OFFSET, data, data_size, data_block_size, proto_ver);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash write failed\n");
@@ -410,7 +427,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Verify Code flash\n");
                 }
-                rc = rl78_verify(fd, CODE_OFFSET, code, code_size, proto_ver);
+                rc = rl78_verify(fd, CODE_OFFSET, code, code_size, code_block_size);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Code flash verification failed\n");
@@ -424,7 +441,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Verify Data flash\n");
                 }
-                rc = rl78_verify(fd, DATA_OFFSET, data, data_size, proto_ver);
+                rc = rl78_verify(fd, DATA_OFFSET, data, data_size, data_block_size);
                 if (0 != rc)
                 {
                     fprintf(stderr, "Data flash verification failed\n");
