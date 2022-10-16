@@ -1,5 +1,6 @@
+TAG := $(shell git describe --tags --always)
 CFLAGS := -O2 -Wall -Wextra -Werror
-CPPFLAGS = -MMD -MP -MF ${@:.o=.d}
+CPPFLAGS = -MMD -MP -MF ${@:.o=.d} -DVERSION=\"$(TAG)\"
 LDFLAGS :=
 LIBS := -lpthread
 
@@ -39,7 +40,6 @@ install: rl78flash rl78g10flash
 ifneq ($(MAKECMDGOALS),clean)
 
 TAR ?= tar
-TAG := $(shell git describe --tags)
 VERSION := $(TAG:v%=%)
 IS_x86_64 := $(shell $(CC) -dumpmachine | grep x86_64)
 ARCH := $(if $(IS_x86_64),amd64,i386)

@@ -32,6 +32,9 @@
 int verbose_level = 0;
 
 const char *usage =
+    "rl78flash " VERSION "\n"
+    "\n"
+    "Usage:\n"
     "rl78flash [options] <port> [<file>]\n"
     "\t-v\tVerbose mode (several times increase verbose level)\n"
     "\t-i\tDisplay info about MCU\n"
@@ -211,6 +214,12 @@ int main(int argc, char *argv[])
             return EINVAL;
         }
     }
+
+    if (1 <= verbose_level)
+    {
+        printf("rl78flash %s\n", VERSION);
+    }
+
     if (invert_reset)
     {
         mode |= MODE_INVERT_RESET;

@@ -30,6 +30,9 @@
 int verbose_level = 0;
 
 const char *usage =
+    "rl78flash " VERSION "\n"
+    "\n"
+    "Usage:\n"
     "rl78g10flash [options] <port> [<file> <size>]\n"
     "\t-a\tAuto mode (Erase/Write-Verify-Reset)\n"
     "\t-w\tWrite memory\n"
@@ -115,6 +118,12 @@ int main(int argc, char *argv[])
             return EINVAL;
         }
     }
+
+    if (1 <= verbose_level)
+    {
+        printf("rl78g10flash %s\n", VERSION);
+    }
+
     if (invert_reset)
     {
         mode |= MODE_INVERT_RESET;
